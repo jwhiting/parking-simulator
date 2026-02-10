@@ -83,7 +83,46 @@ export class PaperRenderer {
     outline.strokeWidth = 0.07;
     outline.fillColor = null;
 
-    const group = new this.paper.Group([path, outline]);
+    const { bodyLength, bodyWidth, rearOverhang, wheelbase, wheelLength } = model.config;
+    const rear = -rearOverhang;
+    const front = rear + bodyLength;
+    const halfWidth = bodyWidth / 2;
+
+    const windshieldMargin = 0.18;
+    const windshieldDepth = wheelLength;
+    const windshieldFrontX = wheelbase - 0.45;
+    const windshieldRearX = windshieldFrontX - windshieldDepth;
+    const windshieldLocalA = {
+      x: windshieldRearX,
+      y: halfWidth - windshieldMargin,
+    };
+    const windshieldLocalB = {
+      x: windshieldFrontX,
+      y: -(halfWidth - windshieldMargin),
+    };
+    const windshieldWorldA = model.toWorld(state, windshieldLocalA.x, windshieldLocalA.y);
+    const windshieldWorldB = model.toWorld(state, windshieldLocalB.x, windshieldLocalB.y);
+    const windshield = new this.paper.Path.Rectangle({
+      from: new this.paper.Point(windshieldWorldA.x, -windshieldWorldA.y),
+      to: new this.paper.Point(windshieldWorldB.x, -windshieldWorldB.y),
+      radius: 0.1,
+      fillColor: "#2b3a45",
+      strokeColor: "#111111",
+      strokeWidth: 0.02,
+    });
+
+    const driverLocalX = (windshieldFrontX + windshieldRearX) / 2;
+    const driverLocalY = Math.min(halfWidth * 0.45, halfWidth - windshieldMargin - 0.05);
+    const driverWorld = model.toWorld(state, driverLocalX, driverLocalY);
+    const driver = new this.paper.Path.Circle({
+      center: new this.paper.Point(driverWorld.x, -driverWorld.y),
+      radius: 0.1,
+      fillColor: "#d9b39a",
+      strokeColor: "#6d5348",
+      strokeWidth: 0.02,
+    });
+
+    const group = new this.paper.Group([path, outline, windshield, driver]);
     return group;
   }
 
