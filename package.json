@@ -1,0 +1,13 @@
+{
+  "name": "parking-sim",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Top-down parking simulator with Paper.js",
+  "scripts": {
+    "render": "node scripts/render.js"
+  },
+  "dependencies": {
+    "paper": "^0.12.17",
+    "canvas": "^2.11.2"
+  }
+}
