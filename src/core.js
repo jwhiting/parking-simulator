@@ -7,7 +7,7 @@ export const DEFAULT_CONFIG = {
   rearOverhang: 1.0,
   wheelLength: 0.7,
   wheelWidth: 0.25,
-  maxSteerDeg: 35,
+  maxSteerDeg: 40,
 };
 
 export const degToRad = (deg) => (deg * Math.PI) / 180;

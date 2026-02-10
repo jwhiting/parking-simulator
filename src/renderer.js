@@ -25,7 +25,12 @@ export class PaperRenderer {
 
   render(state, model, options = {}) {
     this.clear();
-    const { showTurnInfo = false, showContactCircles = true, scale = 60 } = options;
+    const {
+      showTurnInfo = false,
+      showContactCircles = true,
+      scale = 60,
+      camera = { x: 0, y: 0 },
+    } = options;
 
     const carGroup = new this.paper.Group();
     carGroup.applyMatrix = false;
@@ -36,13 +41,10 @@ export class PaperRenderer {
     carGroup.addChildren([body, ...wheels]);
 
     this.layers.car.addChild(carGroup);
-    carGroup.position = this.paper.view.center;
-    carGroup.scale(scale);
 
     const overlayGroup = new this.paper.Group();
     overlayGroup.applyMatrix = false;
     this.layers.overlay.addChild(overlayGroup);
-    overlayGroup.matrix = carGroup.matrix.clone();
 
     this.background.remove();
     this.background = new this.paper.Path.Rectangle({
@@ -65,6 +67,8 @@ export class PaperRenderer {
       }
     }
 
+    this.paper.view.zoom = scale;
+    this.paper.view.center = new this.paper.Point(camera.x, -camera.y);
     this.paper.view.update();
   }
 
@@ -92,20 +96,16 @@ export class PaperRenderer {
     const windshieldDepth = wheelLength;
     const windshieldFrontX = wheelbase - 0.45;
     const windshieldRearX = windshieldFrontX - windshieldDepth;
-    const windshieldLocalA = {
-      x: windshieldRearX,
-      y: halfWidth - windshieldMargin,
-    };
-    const windshieldLocalB = {
-      x: windshieldFrontX,
-      y: -(halfWidth - windshieldMargin),
-    };
-    const windshieldWorldA = model.toWorld(state, windshieldLocalA.x, windshieldLocalA.y);
-    const windshieldWorldB = model.toWorld(state, windshieldLocalB.x, windshieldLocalB.y);
-    const windshield = new this.paper.Path.Rectangle({
-      from: new this.paper.Point(windshieldWorldA.x, -windshieldWorldA.y),
-      to: new this.paper.Point(windshieldWorldB.x, -windshieldWorldB.y),
-      radius: 0.1,
+    const windshieldLocal = [
+      { x: windshieldRearX, y: halfWidth - windshieldMargin },
+      { x: windshieldFrontX, y: halfWidth - windshieldMargin },
+      { x: windshieldFrontX, y: -(halfWidth - windshieldMargin) },
+      { x: windshieldRearX, y: -(halfWidth - windshieldMargin) },
+    ];
+    const windshieldWorld = windshieldLocal.map((p) => model.toWorld(state, p.x, p.y));
+    const windshield = new this.paper.Path({
+      segments: windshieldWorld.map((p) => new this.paper.Point(p.x, -p.y)),
+      closed: true,
       fillColor: "#2b3a45",
       strokeColor: "#111111",
       strokeWidth: 0.02,
@@ -192,7 +192,7 @@ export class PaperRenderer {
   _drawContactCircles(state, model) {
     const info = model.getTurningRadii(state);
     if (!info) {
-      return null;
+      return this._drawContactLines(state, model);
     }
 
     const wheels = model.getWheelPositions(state);
@@ -248,6 +248,55 @@ export class PaperRenderer {
 
     const outer = chassisCircle(outerChassisPoint);
     const inner = chassisCircle(innerChassisPoint);
+
+    return new this.paper.Group([
+      rearLeft,
+      rearRight,
+      frontLeft,
+      frontRight,
+      outer,
+      inner,
+    ]);
+  }
+
+  _drawContactLines(state, model) {
+    const wheels = model.getWheelPositions(state);
+    const { wheelWidth, bodyWidth } = model.config;
+    const halfBody = bodyWidth / 2;
+    const outerSide = halfBody;
+    const innerSide = -halfBody;
+
+    const outerChassisPoint = model.toWorld(state, model.config.wheelbase, outerSide);
+    const innerChassisPoint = model.toWorld(state, 0, innerSide);
+
+    const dir = {
+      x: Math.cos(state.heading),
+      y: Math.sin(state.heading),
+    };
+    const lineSpan = 25;
+
+    const lineThrough = (point, color, width, opacity = 0.2) =>
+      new this.paper.Path.Line({
+        from: new this.paper.Point(
+          point.x - dir.x * lineSpan,
+          -(point.y - dir.y * lineSpan)
+        ),
+        to: new this.paper.Point(
+          point.x + dir.x * lineSpan,
+          -(point.y + dir.y * lineSpan)
+        ),
+        strokeColor: color,
+        strokeWidth: width,
+        opacity,
+      });
+
+    const rearLeft = lineThrough(wheels.rearLeft, "#3a6ea5", wheelWidth, 0.2);
+    const rearRight = lineThrough(wheels.rearRight, "#3a6ea5", wheelWidth, 0.2);
+    const frontLeft = lineThrough(wheels.frontLeft, "#3a9f66", wheelWidth, 0.2);
+    const frontRight = lineThrough(wheels.frontRight, "#3a9f66", wheelWidth, 0.2);
+
+    const outer = lineThrough(outerChassisPoint, "#b34b2e", 0.05, 0.8);
+    const inner = lineThrough(innerChassisPoint, "#b34b2e", 0.05, 0.8);
 
     return new this.paper.Group([
       rearLeft,

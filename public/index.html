@@ -93,35 +93,24 @@
       <h1>Parking Simulator</h1>
       <div class="control">
         <label for="steer">Steering (deg)</label>
-        <input id="steer" type="range" min="-35" max="35" step="1" value="0" />
+        <input id="steer" type="range" min="-40" max="40" step="1" value="0" />
         <div class="status" id="steerValue">0°</div>
-      </div>
-      <div class="control">
-        <label for="step">Move Distance</label>
-        <input id="step" type="number" value="0.5" step="0.1" />
       </div>
       <div class="row">
         <button id="forward" class="primary">Forward</button>
         <button id="backward">Backward</button>
       </div>
       <div class="control">
-        <label for="playhead">Playbook Step</label>
-        <input id="playhead" type="range" min="0" max="6" value="0" />
-        <div class="status" id="playheadValue">0 / 6</div>
-      </div>
-      <div class="control">
         <label>Status</label>
         <div class="status" id="statusText">Booting...</div>
       </div>
       <button id="reset">Reset</button>
-      <button id="loadScenario">Load Parallel Parking</button>
     </aside>
     <canvas id="canvas" resize></canvas>
 
     <script type="module">
       import { Simulator, VehicleState } from "../src/core.js";
       import { PaperRenderer } from "../src/renderer.js";
-      import { PARALLEL_PARKING_SCENARIO } from "../src/scenario.js";
 
       const canvas = document.getElementById("canvas");
 
@@ -141,20 +130,21 @@
       const renderer = new PaperRenderer(paper);
       const steerInput = document.getElementById("steer");
       const steerValue = document.getElementById("steerValue");
-      const stepInput = document.getElementById("step");
-      const playhead = document.getElementById("playhead");
-      const playheadValue = document.getElementById("playheadValue");
       const statusText = document.getElementById("statusText");
 
-      let playbook = [];
       let startState = new VehicleState();
 
       function updateSteerDisplay() {
         steerValue.textContent = `${steerInput.value}°`;
       }
 
+      const camera = { x: 0, y: 0, zoom: 65 };
+
       function renderState(state) {
-        renderer.render(state, sim.model, { scale: 65 });
+        renderer.render(state, sim.model, {
+          scale: camera.zoom,
+          camera: { x: camera.x, y: camera.y },
+        });
         statusText.textContent = `x=${state.x.toFixed(2)}, y=${state.y.toFixed(2)}, heading=${(state.heading * 180 / Math.PI).toFixed(1)}°`;
       }
 
@@ -163,52 +153,87 @@
         renderState(sim.state);
       }
 
-      function loadScenario() {
-        startState = new VehicleState(PARALLEL_PARKING_SCENARIO.startState);
-        playbook = PARALLEL_PARKING_SCENARIO.playbook;
-        playhead.max = playbook.length;
-        playhead.value = 0;
-        playheadValue.textContent = `0 / ${playbook.length}`;
-        reset();
-      }
 
       steerInput.addEventListener("input", () => {
         updateSteerDisplay();
-        sim.setSteerDeg(Number(steerInput.value));
+        sim.setSteerDeg(-Number(steerInput.value));
         renderState(sim.state);
       });
 
-      document.getElementById("forward").addEventListener("click", () => {
-        sim.move(Number(stepInput.value));
-        renderState(sim.state);
-      });
+      const forwardBtn = document.getElementById("forward");
+      const backwardBtn = document.getElementById("backward");
+      const frameMs = 50;
+      const stepPerFrame = 0.1;
+      let driveTimer = null;
 
-      document.getElementById("backward").addEventListener("click", () => {
-        sim.move(-Number(stepInput.value));
-        renderState(sim.state);
-      });
+      function startDrive(direction) {
+        if (driveTimer) {
+          return;
+        }
+        driveTimer = setInterval(() => {
+          sim.move(direction * stepPerFrame);
+          renderState(sim.state);
+        }, frameMs);
+      }
 
-      playhead.addEventListener("input", () => {
-        const index = Number(playhead.value);
-        playheadValue.textContent = `${index} / ${playbook.length}`;
-        const snapshot = sim.applyPlaybook(playbook, index);
-        renderState(snapshot);
-      });
+      function stopDrive() {
+        if (driveTimer) {
+          clearInterval(driveTimer);
+          driveTimer = null;
+        }
+      }
+
+      forwardBtn.addEventListener("pointerdown", () => startDrive(1));
+      backwardBtn.addEventListener("pointerdown", () => startDrive(-1));
+      window.addEventListener("pointerup", stopDrive);
+      window.addEventListener("blur", stopDrive);
 
       document.getElementById("reset").addEventListener("click", () => {
         reset();
       });
 
-      document.getElementById("loadScenario").addEventListener("click", () => {
-        loadScenario();
+      let isPanning = false;
+      let lastPoint = null;
+
+      canvas.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0) {
+          return;
+        }
+        isPanning = true;
+        lastPoint = { x: event.clientX, y: event.clientY };
       });
+
+      window.addEventListener("pointermove", (event) => {
+        if (!isPanning || !lastPoint) {
+          return;
+        }
+        const dx = event.clientX - lastPoint.x;
+        const dy = event.clientY - lastPoint.y;
+        camera.x -= dx / camera.zoom;
+        camera.y += dy / camera.zoom;
+        lastPoint = { x: event.clientX, y: event.clientY };
+        renderState(sim.state);
+      });
+
+      window.addEventListener("pointerup", () => {
+        isPanning = false;
+        lastPoint = null;
+      });
+
+      canvas.addEventListener("wheel", (event) => {
+        event.preventDefault();
+        const factor = Math.exp(-event.deltaY * 0.001);
+        const nextZoom = Math.max(25, Math.min(200, camera.zoom * factor));
+        camera.zoom = nextZoom;
+        renderState(sim.state);
+      }, { passive: false });
 
       window.addEventListener("resize", () => {
         resizeCanvas();
         renderState(sim.state);
       });
       updateSteerDisplay();
-      loadScenario();
+      reset();
     </script>
   </body>
 </html>

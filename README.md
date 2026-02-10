@@ -5,7 +5,6 @@ Top-down SUV parking simulator with accurate turning geometry, Paper.js renderin
 ## Files
 - `src/core.js` core vehicle model and simulator
 - `src/renderer.js` Paper.js renderer
-- `src/scenario.js` parallel parking playbook
 - `public/index.html` browser demo
 - `scripts/render.js` headless renderer for PNG output
 
@@ -19,5 +18,3 @@ Install dependencies and render a frame:
 npm install
 npm run render -- --step 3 --out out/frame-3.png
 ```
-
-`--step` chooses how many playbook commands to apply.
