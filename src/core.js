@@ -12,6 +12,7 @@ export const DEFAULT_CONFIG = {
 
 export const degToRad = (deg) => (deg * Math.PI) / 180;
 export const radToDeg = (rad) => (rad * 180) / Math.PI;
+const MIN_TURN_STEER_RAD = degToRad(0.5);
 
 export function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -47,7 +48,7 @@ export class VehicleModel {
 
   move(state, distance) {
     const steer = state.steer;
-    if (Math.abs(steer) < 1e-6) {
+    if (Math.abs(steer) < MIN_TURN_STEER_RAD) {
       state.x += Math.cos(state.heading) * distance;
       state.y += Math.sin(state.heading) * distance;
       return;
@@ -106,7 +107,9 @@ export class VehicleModel {
 
   getTurningRadii(state) {
     const steer = state.steer;
-    if (Math.abs(steer) < 1e-6) {
+    // For very small steering angles, render straight sweep guides to avoid
+    // numerically huge radii that visually drift from the vehicle.
+    if (Math.abs(steer) < MIN_TURN_STEER_RAD) {
       return null;
     }
     const R = this.config.wheelbase / Math.tan(steer);
