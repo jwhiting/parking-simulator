@@ -76,6 +76,7 @@ export class PaperRenderer {
 
     this.paper.view.zoom = scale;
     this.paper.view.center = new this.paper.Point(camera.x, -camera.y);
+    this.paper.view.draw();
     this.paper.view.update();
   }
 
