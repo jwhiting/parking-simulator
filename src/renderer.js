@@ -320,12 +320,16 @@ export class PaperRenderer {
     if (!world || !world.objects) {
       return;
     }
+    const offset = world.offset || { x: 0, y: 0 };
 
     world.objects.forEach((obj) => {
       if (obj.type === "rect") {
         const path = new this.paper.Path.Rectangle({
-          from: new this.paper.Point(obj.x, -obj.y),
-          to: new this.paper.Point(obj.x + obj.width, -(obj.y + obj.height)),
+          from: new this.paper.Point(obj.x + offset.x, -(obj.y + offset.y)),
+          to: new this.paper.Point(
+            obj.x + obj.width + offset.x,
+            -(obj.y + obj.height + offset.y)
+          ),
           fillColor: obj.fill || null,
           strokeColor: obj.stroke || null,
           strokeWidth: obj.strokeWidth || 0.02,
@@ -336,8 +340,8 @@ export class PaperRenderer {
         layer.addChild(path);
       } else if (obj.type === "line") {
         const path = new this.paper.Path.Line({
-          from: new this.paper.Point(obj.x1, -obj.y1),
-          to: new this.paper.Point(obj.x2, -obj.y2),
+          from: new this.paper.Point(obj.x1 + offset.x, -(obj.y1 + offset.y)),
+          to: new this.paper.Point(obj.x2 + offset.x, -(obj.y2 + offset.y)),
           strokeColor: obj.stroke || "#d6d1c9",
           strokeWidth: obj.strokeWidth || 0.03,
           dashArray: obj.dash || null,
@@ -345,7 +349,9 @@ export class PaperRenderer {
         layer.addChild(path);
       } else if (obj.type === "poly") {
         const path = new this.paper.Path({
-          segments: obj.points.map((p) => new this.paper.Point(p.x, -p.y)),
+          segments: obj.points.map(
+            (p) => new this.paper.Point(p.x + offset.x, -(p.y + offset.y))
+          ),
           closed: true,
           fillColor: obj.fill || null,
           strokeColor: obj.stroke || null,

@@ -107,6 +107,9 @@
       <div class="row">
         <button id="worldTight">Tight Lot</button>
       </div>
+      <div class="row">
+        <button id="worldApartment">Apartment</button>
+      </div>
       <div class="control">
         <label>Status</label>
         <div class="status" id="statusText">Booting...</div>
@@ -118,7 +121,7 @@
     <script type="module">
       import { Simulator, VehicleState } from "../src/core.js";
       import { PaperRenderer } from "../src/renderer.js";
-      import { EMPTY_WORLD, PARKING_LOT_WORLD, TIGHT_PARKING_LOT_WORLD } from "../src/worlds.js";
+      import { EMPTY_WORLD, PARKING_LOT_WORLD, TIGHT_PARKING_LOT_WORLD, APARTMENT_PARKING_WORLD } from "../src/worlds.js";
 
       const canvas = document.getElementById("canvas");
 
@@ -214,6 +217,11 @@
 
       document.getElementById("worldTight").addEventListener("click", () => {
         currentWorld = TIGHT_PARKING_LOT_WORLD;
+        renderState(sim.state);
+      });
+
+      document.getElementById("worldApartment").addEventListener("click", () => {
+        currentWorld = APARTMENT_PARKING_WORLD;
         renderState(sim.state);
       });
 

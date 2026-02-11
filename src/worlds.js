@@ -236,3 +236,170 @@ export const TIGHT_PARKING_LOT_WORLD = (() => {
     objects,
   };
 })();
+
+export const APARTMENT_PARKING_WORLD = (() => {
+  const objects = [];
+  const carWidth = 2.0;
+  const carLength = 4.8;
+  const buildingWidth = 4 * carLength;
+  const buildingHeight = 1.5 * carLength;
+  const drivewayPadding = carWidth * 0.2;
+  const drivewayWidth = carWidth + 2 * drivewayPadding;
+  const courtyardHeight = carLength;
+  const gap = carWidth * 0.5;
+  const lotHeight = 2 * carWidth + 3 * gap;
+  const totalWidth = buildingWidth + 2 * drivewayWidth;
+  const roadHeight = carWidth + 1.2;
+
+  const buildingTop = 6.0;
+  const buildingBottom = buildingTop - buildingHeight;
+  const courtyardTop = buildingBottom;
+  const courtyardBottom = courtyardTop - courtyardHeight;
+  const lotTop = courtyardBottom;
+  const lotBottom = lotTop - lotHeight;
+  const midY = lotTop - gap - carWidth - gap / 2;
+  const seSpotCenter = {
+    x: totalWidth / 4,
+    y: (lotBottom + midY) / 2,
+  };
+
+  // ground
+  objects.push({
+    type: "rect",
+    x: -totalWidth / 2 - 2,
+    y: lotBottom - 4,
+    width: totalWidth + 4,
+    height: (buildingTop + roadHeight) - (lotBottom - 4),
+    fill: "#dad3c9",
+    stroke: "#cbbfb2",
+    strokeWidth: 0.05,
+  });
+
+  // road north of building
+  objects.push({
+    type: "rect",
+    x: -totalWidth / 2 - 2,
+    y: buildingTop,
+    width: totalWidth + 4,
+    height: roadHeight,
+    fill: "#e2d9cf",
+    stroke: "#c7bcae",
+    strokeWidth: 0.03,
+  });
+
+  // building block
+  objects.push({
+    type: "rect",
+    x: -buildingWidth / 2,
+    y: buildingBottom,
+    width: buildingWidth,
+    height: buildingHeight,
+    fill: "#c5b8a9",
+    stroke: "#9a8b7c",
+    strokeWidth: 0.04,
+  });
+
+  // driveways left/right (north to south along building + courtyard)
+  objects.push({
+    type: "rect",
+    x: -buildingWidth / 2 - drivewayWidth,
+    y: courtyardBottom,
+    width: drivewayWidth,
+    height: buildingHeight + courtyardHeight,
+    fill: "#e2d9cf",
+    stroke: "#c7bcae",
+    strokeWidth: 0.03,
+  });
+  objects.push({
+    type: "rect",
+    x: buildingWidth / 2,
+    y: courtyardBottom,
+    width: drivewayWidth,
+    height: buildingHeight + courtyardHeight,
+    fill: "#e2d9cf",
+    stroke: "#c7bcae",
+    strokeWidth: 0.03,
+  });
+
+  // courtyard walls (lines)
+  objects.push({
+    type: "line",
+    x1: -buildingWidth / 2,
+    y1: courtyardTop,
+    x2: buildingWidth / 2,
+    y2: courtyardTop,
+    stroke: "#9a8b7c",
+    strokeWidth: 0.06,
+  });
+  objects.push({
+    type: "line",
+    x1: -buildingWidth / 2,
+    y1: courtyardBottom,
+    x2: buildingWidth / 2,
+    y2: courtyardBottom,
+    stroke: "#9a8b7c",
+    strokeWidth: 0.06,
+  });
+  objects.push({
+    type: "line",
+    x1: -buildingWidth / 2,
+    y1: courtyardBottom,
+    x2: -buildingWidth / 2,
+    y2: courtyardTop,
+    stroke: "#9a8b7c",
+    strokeWidth: 0.06,
+  });
+  objects.push({
+    type: "line",
+    x1: buildingWidth / 2,
+    y1: courtyardBottom,
+    x2: buildingWidth / 2,
+    y2: courtyardTop,
+    stroke: "#9a8b7c",
+    strokeWidth: 0.06,
+  });
+
+  // rear parking lot pad
+  objects.push({
+    type: "rect",
+    x: -totalWidth / 2,
+    y: lotBottom,
+    width: totalWidth,
+    height: lotHeight,
+    fill: "#e2d9cf",
+    stroke: "#c7bcae",
+    strokeWidth: 0.03,
+  });
+
+  // 2x2 dotted divider lines
+  objects.push({
+    type: "line",
+    x1: 0,
+    y1: lotBottom,
+    x2: 0,
+    y2: lotTop,
+    stroke: "#c7bcae",
+    strokeWidth: 0.04,
+    dash: [0.3, 0.25],
+  });
+  objects.push({
+    type: "line",
+    x1: -totalWidth / 2,
+    y1: midY,
+    x2: totalWidth / 2,
+    y2: midY,
+    stroke: "#c7bcae",
+    strokeWidth: 0.04,
+    dash: [0.3, 0.25],
+  });
+
+  const rearOverhang = 1.0;
+  return {
+    name: "Apartment Parking",
+    objects,
+    offset: {
+      x: -rearOverhang,
+      y: -seSpotCenter.y,
+    },
+  };
+})();
