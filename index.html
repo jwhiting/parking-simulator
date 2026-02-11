@@ -67,8 +67,8 @@
         position: absolute;
         left: 50%;
         bottom: 24px;
-        width: 300px;
-        height: 160px;
+        width: 390px;
+        height: 208px;
         transform: translateX(-50%);
         cursor: crosshair;
         border: 2px solid rgba(0, 0, 0, 0.2);
@@ -81,7 +81,7 @@
         left: 0;
         right: 0;
         top: 50%;
-        height: 20%;
+        height: 22%;
         transform: translateY(-50%);
         background: rgba(255, 255, 255, 0.15);
         border-top: 1px dashed rgba(0, 0, 0, 0.2);
@@ -94,7 +94,7 @@
         top: -28%;
         bottom: -28%;
         left: 50%;
-        width: 16%;
+        width: 10.2%;
         transform: translateX(-50%);
         background: rgba(255, 255, 255, 0.2);
         border-left: 1px dashed rgba(0, 0, 0, 0.25);
@@ -109,6 +109,46 @@
         border-radius: 50%;
         background: rgba(255, 255, 255, 0.4);
         pointer-events: none;
+      }
+      .drive-pad .arrow {
+        position: absolute;
+        font-size: 18px;
+        font-weight: 700;
+        color: rgba(0, 0, 0, 0.45);
+        user-select: none;
+        pointer-events: none;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+        letter-spacing: 0.02em;
+        text-align: center;
+      }
+      .drive-pad .arrow.up {
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .drive-pad .arrow.down {
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .drive-pad .arrow.left {
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      .drive-pad .arrow.right {
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      .drive-pad .arrow .label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-top: 2px;
+        text-align: center;
       }
       .row {
         display: flex;
@@ -172,6 +212,10 @@
       <canvas id="canvas" resize></canvas>
       <div id="drivePad" class="drive-pad">
         <div class="center-band"></div>
+        <div class="arrow up">↑<span class="label">Drive</span></div>
+        <div class="arrow down">↓<span class="label">Reverse</span></div>
+        <div class="arrow left">←<span class="label">Steer Left</span></div>
+        <div class="arrow right">→<span class="label">Steer Right</span></div>
         <div id="reticle" class="reticle" style="left:50%; top:50%;"></div>
       </div>
     </div>
@@ -204,8 +248,8 @@
       let startState = new VehicleState();
 
       const maxSteer = 32.5;
-      const steerDeadBand = 0.16;
-      const throttleDeadBand = 0.2;
+      const steerDeadBand = 0.102;
+      const throttleDeadBand = 0.22;
       const throttleScale = 1;
       let driveState = { steer: 0, throttle: 0 };
 
@@ -229,6 +273,15 @@
       function setStartState(state) {
         startState = state;
         reset();
+      }
+
+      function setWorld(world) {
+        currentWorld = world;
+        if (world.start) {
+          setStartState(new VehicleState(world.start));
+        } else {
+          setStartState(new VehicleState());
+        }
       }
 
       function startInApartmentSpot(spot, heading) {
@@ -321,21 +374,15 @@
       });
 
       document.getElementById("worldEmpty").addEventListener("click", () => {
-        currentWorld = EMPTY_WORLD;
-        setStartState(new VehicleState());
-        renderState(sim.state);
+        setWorld(EMPTY_WORLD);
       });
 
       document.getElementById("worldLot").addEventListener("click", () => {
-        currentWorld = PARKING_LOT_WORLD;
-        setStartState(new VehicleState());
-        renderState(sim.state);
+        setWorld(PARKING_LOT_WORLD);
       });
 
       document.getElementById("worldTight").addEventListener("click", () => {
-        currentWorld = TIGHT_PARKING_LOT_WORLD;
-        setStartState(new VehicleState());
-        renderState(sim.state);
+        setWorld(TIGHT_PARKING_LOT_WORLD);
       });
 
       const apartmentSpots = APARTMENT_PARKING_WORLD.spots;
@@ -384,7 +431,7 @@
 
       canvas.addEventListener("wheel", (event) => {
         event.preventDefault();
-        const factor = Math.exp(-event.deltaY * 0.001);
+        const factor = Math.exp(-event.deltaY * 0.008);
         const nextZoom = Math.max(0.2, Math.min(6, camera.zoom * factor));
         camera.zoom = nextZoom;
         renderState(sim.state);
@@ -408,7 +455,7 @@
           const zoomY = (canvas.height - padding * 2) / worldHeight;
           camera.zoom = Math.max(0.1, Math.min(zoomX, zoomY)) * 0.6;
           camera.x = (minX + maxX) / 2;
-          camera.y = (minY + maxY) / 2 - 240;
+          camera.y = (minY + maxY) / 2 - 420;
         }
         reset();
       });

@@ -48,19 +48,30 @@ export const PARKING_LOT_WORLD = (() => {
   const objects = [];
   const carWidth = 73.5;
   const carLength = 184.8;
-  const stallWidth = carWidth * 1.5;
-  const stallDepth = carLength * (5.6 / 4.8);
-  const spaces = 10;
-  const stallMargin = stallWidth * 3.8;
-  const lotWidth = spaces * stallWidth + stallMargin * 2;
-  const lotHeight = stallDepth * (40 / 5.6);
+  const spotWidth = 8.5 * 12;
+  const spotHeight = 18 * 12;
+  const spotPadding = Math.max(0, (spotWidth - carWidth) / 2);
+  const aisleHeight = 24 * 12;
+  const curbHeight = carWidth * 0.3;
+  const spaces = 12;
+  const lotWidth = spotWidth * spaces;
+  const lotHeight = curbHeight * 2 + spotHeight * 2 + aisleHeight;
   const stroke = carWidth * 0.015;
+
+  const lotTop = lotHeight / 2;
+  const lotBottom = -lotHeight / 2;
+  const northCurbBottom = lotTop - curbHeight;
+  const northRowBottom = northCurbBottom - spotHeight;
+  const aisleTop = northRowBottom;
+  const aisleBottom = aisleTop - aisleHeight;
+  const southRowBottom = aisleBottom - spotHeight;
+  const southCurbBottom = southRowBottom - curbHeight;
 
   // asphalt background
   objects.push({
     type: "rect",
     x: -lotWidth / 2,
-    y: -lotHeight / 2,
+    y: lotBottom,
     width: lotWidth,
     height: lotHeight,
     fill: "#dad3c9",
@@ -68,88 +79,93 @@ export const PARKING_LOT_WORLD = (() => {
     strokeWidth: stroke * 1.5,
   });
 
-  // center driving lane lines
+  // curbs
+  objects.push({
+    type: "rect",
+    x: -lotWidth / 2,
+    y: northCurbBottom,
+    width: lotWidth,
+    height: curbHeight,
+    fill: "#bfb3a5",
+    stroke: "#a89988",
+    strokeWidth: stroke,
+  });
+  objects.push({
+    type: "rect",
+    x: -lotWidth / 2,
+    y: southCurbBottom,
+    width: lotWidth,
+    height: curbHeight,
+    fill: "#bfb3a5",
+    stroke: "#a89988",
+    strokeWidth: stroke,
+  });
+
+  // center driving lane line
   objects.push({
     type: "line",
-    x1: -lotWidth / 2 + 2,
-    y1: 0,
-    x2: lotWidth / 2 - 2,
-    y2: 0,
+    x1: -lotWidth / 2,
+    y1: (aisleTop + aisleBottom) / 2,
+    x2: lotWidth / 2,
+    y2: (aisleTop + aisleBottom) / 2,
     stroke: "#c7bcae",
     strokeWidth: stroke * 1.5,
     dash: [carWidth * 0.15, carWidth * 0.175],
   });
 
-  // parking rows (top and bottom)
-  const rowOffset = stallDepth * (2.2 / 5.2);
+  // parking rows (north/south)
   addParkingRow(objects, {
-    x: -lotWidth / 2 + stallWidth * 2.8,
-    y: rowOffset,
+    x: -lotWidth / 2,
+    y: northRowBottom,
     spaces,
-    stallWidth,
-    stallDepth,
+    stallWidth: spotWidth,
+    stallDepth: spotHeight,
   });
   addParkingRow(objects, {
-    x: -lotWidth / 2 + stallWidth * 2.8,
-    y: -stallDepth * (7.4 / 5.2),
+    x: -lotWidth / 2,
+    y: southRowBottom,
     spaces,
-    stallWidth,
-    stallDepth,
+    stallWidth: spotWidth,
+    stallDepth: spotHeight,
   });
 
-  // parked cars top row
+  // parked cars north row
   for (let i = 0; i < spaces; i += 1) {
     if (i === 3 || i === 6) {
-      continue; // open spots
+      continue;
     }
     addParkedCar(objects, {
-      x: -lotWidth / 2 + stallWidth * 2.8 + i * stallWidth + (stallWidth - carWidth) / 2,
-      y: rowOffset + carWidth * 0.2,
+      x: -lotWidth / 2 + i * spotWidth + spotPadding,
+      y: northRowBottom + spotPadding,
       width: carWidth,
       height: carLength,
       color: i % 2 === 0 ? "#9aa3a9" : "#8d8a85",
     });
   }
 
-  // parked cars bottom row
+  // parked cars south row
   for (let i = 0; i < spaces; i += 1) {
     if (i === 4 || i === 8) {
-      continue; // open spots
+      continue;
     }
     addParkedCar(objects, {
-      x: -lotWidth / 2 + stallWidth * 2.8 + i * stallWidth + (stallWidth - carWidth) / 2,
-      y: -(stallDepth * (7.4 / 5.2) - carWidth * 0.2),
+      x: -lotWidth / 2 + i * spotWidth + spotPadding,
+      y: southRowBottom + spotPadding,
       width: carWidth,
       height: carLength,
       color: i % 2 === 0 ? "#a28a78" : "#7f8a8f",
     });
   }
 
-  // curbs
-  objects.push({
-    type: "rect",
-    x: -lotWidth / 2 + carWidth,
-    y: stallDepth * (8.2 / 5.2),
-    width: lotWidth - carWidth * 2,
-    height: carWidth * 0.3,
-    fill: "#bfb3a5",
-    stroke: "#a89988",
-    strokeWidth: stroke,
-  });
-  objects.push({
-    type: "rect",
-    x: -lotWidth / 2 + carWidth,
-    y: -stallDepth * (8.7 / 5.2),
-    width: lotWidth - carWidth * 2,
-    height: carWidth * 0.3,
-    fill: "#bfb3a5",
-    stroke: "#a89988",
-    strokeWidth: stroke,
-  });
-
   return {
     name: "Parking Lot",
     objects,
+    start: {
+      x: 0,
+      y: (aisleTop + aisleBottom) / 2 + aisleHeight * 0.25,
+      heading: 0,
+      steer: 0,
+    },
   };
 })();
 
@@ -157,18 +173,29 @@ export const TIGHT_PARKING_LOT_WORLD = (() => {
   const objects = [];
   const carWidth = 73.5;
   const carLength = 184.8;
-  const stallWidth = carWidth * 1.3;
-  const stallDepth = carLength * (5.2 / 4.8);
-  const spaces = 10;
-  const stallMargin = stallWidth * (7 / 2.6);
-  const lotWidth = spaces * stallWidth + stallMargin * 2;
-  const lotHeight = stallDepth * (36 / 5.2);
+  const spotWidth = 7.5 * 12;
+  const spotHeight = 16 * 12;
+  const spotPadding = Math.max(0, (spotWidth - carWidth) / 2);
+  const aisleHeight = 24 * 12;
+  const curbHeight = carWidth * 0.3;
+  const spaces = 12;
+  const lotWidth = spotWidth * spaces;
+  const lotHeight = curbHeight * 2 + spotHeight * 2 + aisleHeight;
   const stroke = carWidth * 0.015;
+
+  const lotTop = lotHeight / 2;
+  const lotBottom = -lotHeight / 2;
+  const northCurbBottom = lotTop - curbHeight;
+  const northRowBottom = northCurbBottom - spotHeight;
+  const aisleTop = northRowBottom;
+  const aisleBottom = aisleTop - aisleHeight;
+  const southRowBottom = aisleBottom - spotHeight;
+  const southCurbBottom = southRowBottom - curbHeight;
 
   objects.push({
     type: "rect",
     x: -lotWidth / 2,
-    y: -lotHeight / 2,
+    y: lotBottom,
     width: lotWidth,
     height: lotHeight,
     fill: "#dad3c9",
@@ -177,30 +204,50 @@ export const TIGHT_PARKING_LOT_WORLD = (() => {
   });
 
   objects.push({
+    type: "rect",
+    x: -lotWidth / 2,
+    y: northCurbBottom,
+    width: lotWidth,
+    height: curbHeight,
+    fill: "#bfb3a5",
+    stroke: "#a89988",
+    strokeWidth: stroke,
+  });
+  objects.push({
+    type: "rect",
+    x: -lotWidth / 2,
+    y: southCurbBottom,
+    width: lotWidth,
+    height: curbHeight,
+    fill: "#bfb3a5",
+    stroke: "#a89988",
+    strokeWidth: stroke,
+  });
+
+  objects.push({
     type: "line",
-    x1: -lotWidth / 2 + 2,
-    y1: 0,
-    x2: lotWidth / 2 - 2,
-    y2: 0,
+    x1: -lotWidth / 2,
+    y1: (aisleTop + aisleBottom) / 2,
+    x2: lotWidth / 2,
+    y2: (aisleTop + aisleBottom) / 2,
     stroke: "#c7bcae",
     strokeWidth: stroke * 1.5,
     dash: [carWidth * 0.15, carWidth * 0.175],
   });
 
-  const rowOffset = stallDepth * 0.5;
   addParkingRow(objects, {
-    x: -lotWidth / 2 + stallWidth * (3.5 / 2.6),
-    y: rowOffset,
+    x: -lotWidth / 2,
+    y: northRowBottom,
     spaces,
-    stallWidth,
-    stallDepth,
+    stallWidth: spotWidth,
+    stallDepth: spotHeight,
   });
   addParkingRow(objects, {
-    x: -lotWidth / 2 + stallWidth * (3.5 / 2.6),
-    y: -stallDepth * 1.5,
+    x: -lotWidth / 2,
+    y: southRowBottom,
     spaces,
-    stallWidth,
-    stallDepth,
+    stallWidth: spotWidth,
+    stallDepth: spotHeight,
   });
 
   for (let i = 0; i < spaces; i += 1) {
@@ -208,8 +255,8 @@ export const TIGHT_PARKING_LOT_WORLD = (() => {
       continue;
     }
     addParkedCar(objects, {
-      x: -lotWidth / 2 + stallWidth * (3.5 / 2.6) + i * stallWidth + (stallWidth - carWidth) / 2,
-      y: rowOffset + carWidth * 0.2,
+      x: -lotWidth / 2 + i * spotWidth + spotPadding,
+      y: northRowBottom + spotPadding,
       width: carWidth,
       height: carLength,
       color: i % 2 === 0 ? "#9aa3a9" : "#8d8a85",
@@ -221,38 +268,23 @@ export const TIGHT_PARKING_LOT_WORLD = (() => {
       continue;
     }
     addParkedCar(objects, {
-      x: -lotWidth / 2 + stallWidth * (3.5 / 2.6) + i * stallWidth + (stallWidth - carWidth) / 2,
-      y: -stallDepth * 1.5 + carWidth * 0.2,
+      x: -lotWidth / 2 + i * spotWidth + spotPadding,
+      y: southRowBottom + spotPadding,
       width: carWidth,
       height: carLength,
       color: i % 2 === 0 ? "#a28a78" : "#7f8a8f",
     });
   }
 
-  objects.push({
-    type: "rect",
-    x: -lotWidth / 2 + carWidth,
-    y: rowOffset + stallDepth + carWidth * 0.3,
-    width: lotWidth - carWidth * 2,
-    height: 6,
-    fill: "#bfb3a5",
-    stroke: "#a89988",
-    strokeWidth: stroke,
-  });
-  objects.push({
-    type: "rect",
-    x: -lotWidth / 2 + carWidth,
-    y: -stallDepth * 1.5 - carWidth * 0.6,
-    width: lotWidth - carWidth * 2,
-    height: 6,
-    fill: "#bfb3a5",
-    stroke: "#a89988",
-    strokeWidth: stroke,
-  });
-
   return {
     name: "Tight Parking Lot",
     objects,
+    start: {
+      x: 0,
+      y: (aisleTop + aisleBottom) / 2 + aisleHeight * 0.25,
+      heading: 0,
+      steer: 0,
+    },
   };
 })();
 
