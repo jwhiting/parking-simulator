@@ -1,14 +1,15 @@
 # Parking Simulator Engine
 
-Top-down SUV parking simulator with accurate turning geometry, Paper.js rendering, and a playbook command system.
+Top-down SUV parking simulator with accurate turning geometry, wheel/body sweep projections, collision detection, and multiple driving scenarios.
 
 ## Files
 - `src/core.js` core vehicle model and simulator
 - `src/renderer.js` Paper.js renderer
-- `public/index.html` browser demo
-- `scripts/render.js` headless renderer for PNG output
+- `src/worlds.js` world definitions (parking lots, apartment)
+- `index.html` browser demo
+- `vite.config.js` build config
 
-## Browser usage (Vite)
+## Local Dev
 Install dependencies and run the dev server:
 
 ```bash
@@ -16,7 +17,8 @@ npm install
 npm run dev
 ```
 
-For a static build:
+## Build & Deploy
+Build for static hosting:
 
 ```bash
 npm run build
