@@ -159,6 +159,11 @@ export const PARKING_LOT_WORLD = (() => {
       heading: 0,
       steer: 0,
     },
+    camera: {
+      x: 0,
+      y: (aisleTop + aisleBottom) / 2,
+      zoom: 0.6,
+    },
   };
 })();
 
@@ -279,6 +284,11 @@ export const TIGHT_PARKING_LOT_WORLD = (() => {
       y: (aisleTop + aisleBottom) / 2 + aisleHeight * 0.25,
       heading: 0,
       steer: 0,
+    },
+    camera: {
+      x: 0,
+      y: (aisleTop + aisleBottom) / 2,
+      zoom: 0.6,
     },
   };
 })();
@@ -569,11 +579,21 @@ export const APARTMENT_PARKING_WORLD = (() => {
     objects,
     offset: { x: 0, y: 0 },
     spots: spotCenters,
-    bounds: {
-      minX: -totalWidth / 2 - carWidth,
-      maxX: totalWidth / 2 + carWidth,
-      minY: lotBottom - carWidth * 2,
-      maxY: buildingTop + roadHeight,
+    cameraFn: (view) => {
+      const minX = -totalWidth / 2 - carWidth;
+      const maxX = totalWidth / 2 + carWidth;
+      const minY = lotBottom - carWidth * 2;
+      const maxY = buildingTop + roadHeight;
+      const worldWidth = maxX - minX;
+      const worldHeight = maxY - minY;
+      const padding = 140;
+      const zoomX = (view.width - padding * 2) / worldWidth;
+      const zoomY = (view.height - padding * 2) / worldHeight;
+      return {
+        x: (minX + maxX) / 2,
+        y: (minY + maxY) / 2 - 420,
+        zoom: Math.max(0.1, Math.min(zoomX, zoomY)) * 0.6,
+      };
     },
   };
 })();

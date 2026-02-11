@@ -58,6 +58,11 @@
         color: #fff6ea;
         border-color: #6a2c1a;
       }
+      button.active {
+        background: #2f2924;
+        color: #f6efe6;
+        border-color: #14110f;
+      }
       #canvas {
         width: 100%;
         height: 100vh;
@@ -184,25 +189,24 @@
         <div class="status">Use the on-canvas pad to steer/throttle</div>
       </div>
       <div class="row">
-        <button id="worldEmpty">Empty World</button>
+        <button id="worldEmpty" data-world="Empty">Empty World</button>
       </div>
       <div class="row">
-        <button id="worldLot">Parking Lot</button>
+        <button id="worldLot" data-world="Parking Lot">Parking Lot</button>
       </div>
       <div class="row">
-        <button id="worldTight">Tight Lot</button>
+        <button id="worldTight" data-world="Tight Parking Lot">Tight Lot</button>
       </div>
       <div class="row">
-        <button id="apt1">Apartment 1</button>
+        <button id="worldApartment" data-world="Apartment Parking">Apartment</button>
       </div>
       <div class="row">
-        <button id="apt2">Apartment 2</button>
+        <button id="apt1">Space 1</button>
+        <button id="apt2">Space 2</button>
       </div>
       <div class="row">
-        <button id="apt3">Apartment 3</button>
-      </div>
-      <div class="row">
-        <button id="apt4">Apartment 4</button>
+        <button id="apt3">Space 3</button>
+        <button id="apt4">Space 4</button>
       </div>
       <div class="control">
         <label>Status</label>
@@ -273,28 +277,29 @@
         renderState(sim.state);
       }
 
-      function setStartState(state) {
-        startState = state;
-        reset();
-      }
-
-      function setWorld(world) {
+      function setWorld(world, startOverride = null) {
         currentWorld = world;
-        if (world.start) {
-          setStartState(new VehicleState(world.start));
-        } else {
-          setStartState(new VehicleState());
-        }
-      }
+        document.querySelectorAll("button[data-world]").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.world === world.name);
+        });
 
-      function startInApartmentSpot(spot, heading) {
-        const { bodyLength, rearOverhang } = sim.model.config;
-        const carCenterX = bodyLength / 2 - rearOverhang;
-        const cos = Math.cos(heading);
-        const sin = Math.sin(heading);
-        const x = spot.x - cos * carCenterX;
-        const y = spot.y - sin * carCenterX;
-        setStartState(new VehicleState({ x, y, heading, steer: 0 }));
+        const view = { width: canvas.width, height: canvas.height };
+        const cam = world.cameraFn ? world.cameraFn(view) : world.camera;
+        if (cam) {
+          camera.x = cam.x;
+          camera.y = cam.y;
+          camera.zoom = cam.zoom;
+        }
+
+        if (startOverride) {
+          startState = startOverride;
+        } else if (world.start) {
+          startState = new VehicleState(world.start);
+        } else {
+          startState = new VehicleState();
+        }
+
+        reset();
       }
 
 
@@ -390,17 +395,33 @@
 
       const apartmentSpots = APARTMENT_PARKING_WORLD.spots;
       const apartmentStarts = [
-        { id: "apt1", spot: "SW" },
-        { id: "apt2", spot: "SE" },
-        { id: "apt3", spot: "NW" },
-        { id: "apt4", spot: "NE" },
+        { id: "apt1", spot: "NW" },
+        { id: "apt2", spot: "NE" },
+        { id: "apt3", spot: "SW" },
+        { id: "apt4", spot: "SE" },
       ];
+      document.getElementById("worldApartment").addEventListener("click", () => {
+        const { x, y } = apartmentSpots.SW;
+        const heading = 0;
+        const { bodyLength, rearOverhang } = sim.model.config;
+        const carCenterX = bodyLength / 2 - rearOverhang;
+        const cos = Math.cos(heading);
+        const sin = Math.sin(heading);
+        const sx = x - cos * carCenterX;
+        const sy = y - sin * carCenterX;
+        setWorld(APARTMENT_PARKING_WORLD, new VehicleState({ x: sx, y: sy, heading, steer: 0 }));
+      });
       apartmentStarts.forEach(({ id, spot }) => {
         document.getElementById(id).addEventListener("click", () => {
-          currentWorld = APARTMENT_PARKING_WORLD;
           const { x, y } = apartmentSpots[spot];
           const heading = spot === "SE" || spot === "NE" ? Math.PI : 0;
-          startInApartmentSpot({ x, y }, heading);
+          const { bodyLength, rearOverhang } = sim.model.config;
+          const carCenterX = bodyLength / 2 - rearOverhang;
+          const cos = Math.cos(heading);
+          const sin = Math.sin(heading);
+          const sx = x - cos * carCenterX;
+          const sy = y - sin * carCenterX;
+          setWorld(APARTMENT_PARKING_WORLD, new VehicleState({ x: sx, y: sy, heading, steer: 0 }));
         });
       });
 
@@ -444,24 +465,20 @@
         resizeCanvas();
         renderState(sim.state);
       });
-      currentWorld = APARTMENT_PARKING_WORLD;
       const defaultSpot = APARTMENT_PARKING_WORLD.spots.SW;
-      startInApartmentSpot(defaultSpot, 0);
-      requestAnimationFrame(() => {
-        resizeCanvas();
-        if (currentWorld.bounds) {
-          const { minX, maxX, minY, maxY } = currentWorld.bounds;
-          const worldWidth = maxX - minX;
-          const worldHeight = maxY - minY;
-          const padding = 140;
-          const zoomX = (canvas.width - padding * 2) / worldWidth;
-          const zoomY = (canvas.height - padding * 2) / worldHeight;
-          camera.zoom = Math.max(0.1, Math.min(zoomX, zoomY)) * 0.6;
-          camera.x = (minX + maxX) / 2;
-          camera.y = (minY + maxY) / 2 - 420;
-        }
-        reset();
-      });
+      {
+        const heading = 0;
+        const { bodyLength, rearOverhang } = sim.model.config;
+        const carCenterX = bodyLength / 2 - rearOverhang;
+        const cos = Math.cos(heading);
+        const sin = Math.sin(heading);
+        const sx = defaultSpot.x - cos * carCenterX;
+        const sy = defaultSpot.y - sin * carCenterX;
+        requestAnimationFrame(() => {
+          resizeCanvas();
+          setWorld(APARTMENT_PARKING_WORLD, new VehicleState({ x: sx, y: sy, heading, steer: 0 }));
+        });
+      }
     </script>
   </body>
 </html>
