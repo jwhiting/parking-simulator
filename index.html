@@ -151,9 +151,6 @@
         <button id="worldTight">Tight Lot</button>
       </div>
       <div class="row">
-        <button id="worldApartment">Apartment</button>
-      </div>
-      <div class="row">
         <button id="apt1">Apartment 1</button>
       </div>
       <div class="row">
@@ -325,21 +322,19 @@
 
       document.getElementById("worldEmpty").addEventListener("click", () => {
         currentWorld = EMPTY_WORLD;
+        setStartState(new VehicleState());
         renderState(sim.state);
       });
 
       document.getElementById("worldLot").addEventListener("click", () => {
         currentWorld = PARKING_LOT_WORLD;
+        setStartState(new VehicleState());
         renderState(sim.state);
       });
 
       document.getElementById("worldTight").addEventListener("click", () => {
         currentWorld = TIGHT_PARKING_LOT_WORLD;
-        renderState(sim.state);
-      });
-
-      document.getElementById("worldApartment").addEventListener("click", () => {
-        currentWorld = APARTMENT_PARKING_WORLD;
+        setStartState(new VehicleState());
         renderState(sim.state);
       });
 
@@ -401,9 +396,20 @@
       });
       currentWorld = APARTMENT_PARKING_WORLD;
       const defaultSpot = APARTMENT_PARKING_WORLD.spots.SW;
-      startInApartmentSpot(defaultSpot, Math.PI);
+      startInApartmentSpot(defaultSpot, 0);
       requestAnimationFrame(() => {
         resizeCanvas();
+        if (currentWorld.bounds) {
+          const { minX, maxX, minY, maxY } = currentWorld.bounds;
+          const worldWidth = maxX - minX;
+          const worldHeight = maxY - minY;
+          const padding = 140;
+          const zoomX = (canvas.width - padding * 2) / worldWidth;
+          const zoomY = (canvas.height - padding * 2) / worldHeight;
+          camera.zoom = Math.max(0.1, Math.min(zoomX, zoomY)) * 0.6;
+          camera.x = (minX + maxX) / 2;
+          camera.y = (minY + maxY) / 2 - 240;
+        }
         reset();
       });
     </script>

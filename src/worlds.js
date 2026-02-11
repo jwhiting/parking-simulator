@@ -263,12 +263,13 @@ export const APARTMENT_PARKING_WORLD = (() => {
   const drivewayWidth = 108;
   const totalWidth = 1128;
   const buildingWidth = totalWidth - 2 * drivewayWidth;
-  const buildingHeight = 1.5 * carLength;
+  const buildingHeight = 1.5 * carLength * 2;
   const courtyardHeight = 180;
   const courtyardWidth = 648;
+  const courtyardWidthNorth = 648 - 144;
   const lotHeight = 306;
   const gap = (lotHeight - 2 * carWidth) / 3;
-  const roadHeight = carWidth * 1.6;
+  const roadHeight = carWidth * 1.6 * 3;
 
   const buildingTop = carWidth * 3;
   const buildingBottom = buildingTop - buildingHeight;
@@ -276,6 +277,8 @@ export const APARTMENT_PARKING_WORLD = (() => {
   const courtyardBottom = courtyardTop - courtyardHeight;
   const courtyardLeft = -courtyardWidth / 2;
   const courtyardRight = courtyardWidth / 2;
+  const courtyardLeftNorth = -courtyardWidthNorth / 2;
+  const courtyardRightNorth = courtyardWidthNorth / 2;
   const lotTop = courtyardBottom;
   const lotBottom = lotTop - lotHeight;
   const spotHeight = 120;
@@ -371,6 +374,17 @@ export const APARTMENT_PARKING_WORLD = (() => {
     stroke: "#c7bcae",
     strokeWidth: carWidth * 0.012,
   });
+  // courtyard fill (north clone)
+  objects.push({
+    type: "rect",
+    x: courtyardLeftNorth,
+    y: courtyardBottom + courtyardHeight,
+    width: courtyardWidthNorth,
+    height: courtyardHeight,
+    fill: "#e2d9cf",
+    stroke: "#c7bcae",
+    strokeWidth: carWidth * 0.012,
+  });
 
   // courtyard walls (lines)
   objects.push({
@@ -379,6 +393,15 @@ export const APARTMENT_PARKING_WORLD = (() => {
     y1: courtyardTop,
     x2: courtyardRight,
     y2: courtyardTop,
+    stroke: "#9a8b7c",
+    strokeWidth: carWidth * 0.02,
+  });
+  objects.push({
+    type: "line",
+    x1: courtyardLeftNorth,
+    y1: courtyardTop + courtyardHeight,
+    x2: courtyardRightNorth,
+    y2: courtyardTop + courtyardHeight,
     stroke: "#9a8b7c",
     strokeWidth: carWidth * 0.02,
   });
@@ -402,10 +425,28 @@ export const APARTMENT_PARKING_WORLD = (() => {
   });
   objects.push({
     type: "line",
+    x1: courtyardLeftNorth,
+    y1: courtyardTop,
+    x2: courtyardLeftNorth,
+    y2: courtyardTop + courtyardHeight,
+    stroke: "#9a8b7c",
+    strokeWidth: carWidth * 0.02,
+  });
+  objects.push({
+    type: "line",
     x1: courtyardRight,
     y1: courtyardBottom,
     x2: courtyardRight,
     y2: courtyardTop,
+    stroke: "#9a8b7c",
+    strokeWidth: carWidth * 0.02,
+  });
+  objects.push({
+    type: "line",
+    x1: courtyardRightNorth,
+    y1: courtyardTop,
+    x2: courtyardRightNorth,
+    y2: courtyardTop + courtyardHeight,
     stroke: "#9a8b7c",
     strokeWidth: carWidth * 0.02,
   });
@@ -451,5 +492,11 @@ export const APARTMENT_PARKING_WORLD = (() => {
     objects,
     offset: { x: 0, y: 0 },
     spots: spotCenters,
+    bounds: {
+      minX: -totalWidth / 2 - carWidth,
+      maxX: totalWidth / 2 + carWidth,
+      minY: lotBottom - carWidth * 2,
+      maxY: buildingTop + roadHeight,
+    },
   };
 })();
