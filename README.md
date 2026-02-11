@@ -8,11 +8,25 @@ Top-down SUV parking simulator with accurate turning geometry, Paper.js renderin
 - `public/index.html` browser demo
 - `scripts/render.js` headless renderer for PNG output
 
-## Browser usage
-Open `public/index.html` in a local static server (ES modules require a server). The demo loads Paper.js from a CDN.
+## Browser usage (Vite)
+Install dependencies and run the dev server:
+
+```bash
+npm install
+npm run dev
+```
+
+For a static build:
+
+```bash
+npm run build
+```
+
+Deploy the `dist/` folder to any static host. The build uses relative paths (`base: "./"`) so it can be hosted from a subfolder.
 
 ## Headless usage
-Install dependencies and render a frame:
+Install dependencies and render a frame (headless). The headless renderer uses `canvas`,
+which is listed as an optional dependency (it is skipped on some hosts).
 
 ```bash
 npm install

@@ -4,10 +4,18 @@
   "type": "module",
   "description": "Top-down parking simulator with Paper.js",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --strictPort",
     "render": "node scripts/render.js"
   },
   "dependencies": {
-    "paper": "^0.12.17",
+    "paper": "^0.12.17"
+  },
+  "optionalDependencies": {
     "canvas": "^2.11.2"
+  },
+  "devDependencies": {
+    "vite": "^5.4.10"
   }
 }
