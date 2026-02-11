@@ -153,6 +153,18 @@
       <div class="row">
         <button id="worldApartment">Apartment</button>
       </div>
+      <div class="row">
+        <button id="apt1">Apartment 1</button>
+      </div>
+      <div class="row">
+        <button id="apt2">Apartment 2</button>
+      </div>
+      <div class="row">
+        <button id="apt3">Apartment 3</button>
+      </div>
+      <div class="row">
+        <button id="apt4">Apartment 4</button>
+      </div>
       <div class="control">
         <label>Status</label>
         <div class="status" id="statusText">Booting...</div>
@@ -215,6 +227,21 @@
       function reset() {
         sim.reset(startState);
         renderState(sim.state);
+      }
+
+      function setStartState(state) {
+        startState = state;
+        reset();
+      }
+
+      function startInApartmentSpot(spot, heading) {
+        const { bodyLength, rearOverhang } = sim.model.config;
+        const carCenterX = bodyLength / 2 - rearOverhang;
+        const cos = Math.cos(heading);
+        const sin = Math.sin(heading);
+        const x = spot.x - cos * carCenterX;
+        const y = spot.y - sin * carCenterX;
+        setStartState(new VehicleState({ x, y, heading, steer: 0 }));
       }
 
 
@@ -316,6 +343,22 @@
         renderState(sim.state);
       });
 
+      const apartmentSpots = APARTMENT_PARKING_WORLD.spots;
+      const apartmentStarts = [
+        { id: "apt1", spot: "SW" },
+        { id: "apt2", spot: "SE" },
+        { id: "apt3", spot: "NW" },
+        { id: "apt4", spot: "NE" },
+      ];
+      apartmentStarts.forEach(({ id, spot }) => {
+        document.getElementById(id).addEventListener("click", () => {
+          currentWorld = APARTMENT_PARKING_WORLD;
+          const { x, y } = apartmentSpots[spot];
+          const heading = spot === "SE" || spot === "NE" ? Math.PI : 0;
+          startInApartmentSpot({ x, y }, heading);
+        });
+      });
+
       let isPanning = false;
       let lastPoint = null;
 
@@ -357,6 +400,8 @@
         renderState(sim.state);
       });
       currentWorld = APARTMENT_PARKING_WORLD;
+      const defaultSpot = APARTMENT_PARKING_WORLD.spots.SW;
+      startInApartmentSpot(defaultSpot, Math.PI);
       requestAnimationFrame(() => {
         resizeCanvas();
         reset();

@@ -284,9 +284,11 @@ export const APARTMENT_PARKING_WORLD = (() => {
   const spotsLeft = -spotWidth;
   const spotsTopRowY = lotTop - spotHeight;
   const spotsBottomRowY = spotsTopRowY - spotHeight;
-  const swSpotCenter = {
-    x: -spotWidth / 2,
-    y: spotsBottomRowY + spotHeight / 2,
+  const spotCenters = {
+    NW: { x: -spotWidth / 2, y: spotsTopRowY + spotHeight / 2 },
+    NE: { x: spotWidth / 2, y: spotsTopRowY + spotHeight / 2 },
+    SW: { x: -spotWidth / 2, y: spotsBottomRowY + spotHeight / 2 },
+    SE: { x: spotWidth / 2, y: spotsBottomRowY + spotHeight / 2 },
   };
 
   // ground
@@ -444,14 +446,10 @@ export const APARTMENT_PARKING_WORLD = (() => {
     }
   }
 
-  const rearOverhang = 41.3;
-  const carCenterX = carLength / 2 - rearOverhang;
   return {
     name: "Apartment Parking",
     objects,
-    offset: {
-      x: carCenterX - swSpotCenter.x,
-      y: -swSpotCenter.y,
-    },
+    offset: { x: 0, y: 0 },
+    spots: spotCenters,
   };
 })();
