@@ -6,14 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview --strictPort",
-    "render": "node scripts/render.js"
+    "preview": "vite preview --strictPort"
   },
   "dependencies": {
     "paper": "^0.12.17"
-  },
-  "optionalDependencies": {
-    "canvas": "^2.11.2"
   },
   "devDependencies": {
     "vite": "^5.4.10"

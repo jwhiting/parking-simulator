@@ -23,12 +23,3 @@ npm run build
 ```
 
 Deploy the `dist/` folder to any static host. The build uses relative paths (`base: "./"`) so it can be hosted from a subfolder.
-
-## Headless usage
-Install dependencies and render a frame (headless). The headless renderer uses `canvas`,
-which is listed as an optional dependency (it is skipped on some hosts).
-
-```bash
-npm install
-npm run render -- --step 3 --out out/frame-3.png
-```
