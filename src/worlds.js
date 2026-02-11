@@ -376,7 +376,7 @@ export const APARTMENT_PARKING_WORLD = (() => {
     fill: "#8f857a",
     stroke: "#6f6458",
     strokeWidth: carWidth * 0.01,
-    solid: true,
+    solid: false,
   });
   objects.push({
     type: "rect",
