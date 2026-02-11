@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>Parking Simulator</title>
     <style>
       :root {
@@ -16,17 +16,83 @@
         font-family: "Space Grotesk", "Gill Sans", "Trebuchet MS", sans-serif;
         color: var(--ink);
         background: radial-gradient(circle at 20% 20%, #fdf8f1, #efe6d9 55%, #e6dccf);
-        min-height: 100vh;
-        display: grid;
-        grid-template-columns: minmax(280px, 340px) 1fr;
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+        touch-action: none;
       }
+      /* Hamburger toggle */
+      #menuToggle {
+        position: fixed;
+        top: 16px;
+        left: 16px;
+        z-index: 200;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        border: 2px solid rgba(0,0,0,0.25);
+        background: rgba(255,255,255,0.85);
+        backdrop-filter: blur(4px);
+        font-size: 24px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      /* Sidebar */
       aside {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 310px;
+        max-width: 85vw;
         padding: 24px;
         background: var(--panel);
         border-right: 2px solid #d0c3b2;
         display: flex;
         flex-direction: column;
         gap: 16px;
+        z-index: 300;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        overflow-y: auto;
+        box-sizing: border-box;
+      }
+      aside.open {
+        transform: translateX(0);
+      }
+      .sidebar-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      #menuClose {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid rgba(0,0,0,0.2);
+        background: rgba(255,255,255,0.6);
+        font-size: 20px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      /* Backdrop */
+      #menuBackdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.3);
+        z-index: 250;
+      }
+      #menuBackdrop.visible {
+        display: block;
       }
       h1 {
         font-size: 1.6rem;
@@ -63,23 +129,34 @@
         color: #f6efe6;
         border-color: #14110f;
       }
+      /* Main layout — fixed positioning avoids iOS vh bugs on rotation */
+      .app-main {
+        position: fixed;
+        inset: 0;
+        display: grid;
+      }
       #canvas {
-        width: 100%;
-        height: 100vh;
+        /* !important overrides Paper.js inline style.width/height (fixed px)
+           so the grid/container always controls the display size. */
+        width: 100% !important;
+        height: 100% !important;
+        min-width: 0;
+        min-height: 0;
         background: #f3eee6;
+        touch-action: none;
+        display: block;
       }
       .drive-pad {
-        position: absolute;
-        left: 50%;
-        bottom: 24px;
-        width: 390px;
-        height: 208px;
-        transform: translateX(-50%);
         cursor: crosshair;
         border: 2px solid rgba(0, 0, 0, 0.2);
         background: rgba(255, 255, 255, 0.2);
         border-radius: 14px;
         backdrop-filter: blur(2px);
+        position: relative;
+        touch-action: none;
+        box-sizing: border-box;
+        min-height: 0;
+        min-width: 0;
       }
       .drive-pad .center-band {
         position: absolute;
@@ -132,7 +209,7 @@
       }
       .drive-pad .arrow {
         position: absolute;
-        font-size: 18px;
+        font-size: clamp(12px, 2.5vmin, 18px);
         font-weight: 700;
         color: rgba(0, 0, 0, 0.45);
         user-select: none;
@@ -163,7 +240,7 @@
       }
       .drive-pad .arrow .label {
         display: block;
-        font-size: 11px;
+        font-size: clamp(8px, 1.8vmin, 11px);
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.08em;
@@ -190,25 +267,65 @@
         letter-spacing: 0.02em;
         text-transform: none;
       }
-      @media (max-width: 900px) {
-        body {
+
+      /* ── Mobile: orientation-based grid ── */
+      @media (max-width: 899px) and (orientation: landscape) {
+        .app-main {
+          grid-template-columns: 1fr 33vw;
+          grid-template-rows: 1fr;
+        }
+      }
+      @media (max-width: 899px) and (orientation: portrait) {
+        .app-main {
           grid-template-columns: 1fr;
-          grid-template-rows: auto 1fr;
+          grid-template-rows: 1fr 33vh;
         }
+      }
+
+      /* ── Desktop: sidebar visible, drive pad overlay ── */
+      @media (min-width: 900px) {
+        body {
+          display: grid;
+          grid-template-columns: minmax(280px, 340px) 1fr;
+          grid-template-rows: 1fr;
+        }
+        #menuToggle { display: none; }
+        #menuBackdrop { display: none !important; }
+        #menuClose { display: none; }
         aside {
-          border-right: none;
-          border-bottom: 2px solid #d0c3b2;
+          position: static;
+          transform: none;
+          transition: none;
+          z-index: auto;
+          width: auto;
+          max-width: none;
+          border-right: 2px solid #d0c3b2;
         }
-        #canvas {
-          height: 70vh;
+        .app-main {
+          position: relative;
+          inset: auto;
+          height: 100vh;
+          height: 100dvh;
+        }
+        .drive-pad {
+          position: absolute;
+          left: 50%;
+          bottom: 24px;
+          width: 390px;
+          height: 208px;
+          transform: translateX(-50%);
         }
       }
     </style>
     <script src="https://unpkg.com/paper@0.12.17/dist/paper-full.min.js"></script>
   </head>
   <body>
-    <aside>
-      <h1>Parking Simulator</h1>
+    <button id="menuToggle">&#9776;</button>
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <h1>Parking Simulator</h1>
+        <button id="menuClose">&#10005;</button>
+      </div>
       <div class="control">
         <label>Drive Pad</label>
         <div class="status">Use the on-canvas pad to steer/throttle</div>
@@ -250,33 +367,59 @@
       </div>
       <button id="reset">Reset</button>
     </aside>
-    <div style="position: relative;">
-      <canvas id="canvas" resize></canvas>
+    <div id="menuBackdrop"></div>
+    <main class="app-main">
+      <canvas id="canvas"></canvas>
       <div id="drivePad" class="drive-pad">
         <div class="center-band"></div>
         <div class="sat-band left"></div>
         <div class="sat-band right"></div>
-        <div class="arrow up">↑<span class="label">Drive</span></div>
-        <div class="arrow down">↓<span class="label">Reverse</span></div>
-        <div class="arrow left">←<span class="label">Steer Left</span></div>
-        <div class="arrow right">→<span class="label">Steer Right</span></div>
+        <div class="arrow up">&#8593;<span class="label">Drive</span></div>
+        <div class="arrow down">&#8595;<span class="label">Reverse</span></div>
+        <div class="arrow left">&#8592;<span class="label">Steer Left</span></div>
+        <div class="arrow right">&#8594;<span class="label">Steer Right</span></div>
         <div id="reticle" class="reticle" style="left:50%; top:50%;"></div>
       </div>
-    </div>
+    </main>
 
     <script type="module">
       import { Simulator, VehicleState, projectForwardUntilCollision } from "./src/core.js";
       import { PaperRenderer } from "./src/renderer.js";
       import { EMPTY_WORLD, PARKING_LOT_WORLD, TIGHT_PARKING_LOT_WORLD, APARTMENT_PARKING_WORLD } from "./src/worlds.js";
 
+      /* ── Hamburger menu ── */
+      const sidebar = document.getElementById("sidebar");
+      const menuBackdrop = document.getElementById("menuBackdrop");
+
+      function openMenu() {
+        sidebar.classList.add("open");
+        menuBackdrop.classList.add("visible");
+      }
+      function closeMenu() {
+        sidebar.classList.remove("open");
+        menuBackdrop.classList.remove("visible");
+      }
+
+      document.getElementById("menuToggle").addEventListener("click", openMenu);
+      document.getElementById("menuClose").addEventListener("click", closeMenu);
+      menuBackdrop.addEventListener("click", closeMenu);
+
+      /* ── Canvas setup ── */
       const canvas = document.getElementById("canvas");
+      let prevW = 0, prevH = 0;
 
       function resizeCanvas() {
         const { width, height } = canvas.getBoundingClientRect();
-        canvas.width = Math.max(1, Math.floor(width));
-        canvas.height = Math.max(1, Math.floor(height));
+        const w = Math.max(1, Math.floor(width));
+        const h = Math.max(1, Math.floor(height));
+        if (w === prevW && h === prevH) return;
+        prevW = w;
+        prevH = h;
         if (paper.view) {
-          paper.view.viewSize = new paper.Size(canvas.width, canvas.height);
+          paper.view.viewSize = new paper.Size(w, h);
+        } else {
+          canvas.width = w;
+          canvas.height = h;
         }
       }
 
@@ -437,6 +580,7 @@
         renderState(sim.state);
       }
 
+      drivePad.addEventListener("contextmenu", (e) => e.preventDefault());
       drivePad.addEventListener("pointerdown", (event) => {
         drivePad.setPointerCapture(event.pointerId);
         updateDriveFromEvent(event);
@@ -548,10 +692,21 @@
         renderState(sim.state);
       }, { passive: false });
 
-      window.addEventListener("resize", () => {
+      // ResizeObserver fires after CSS layout settles, unlike window.resize
+      // which can fire before the grid recalculates on orientation change.
+      new ResizeObserver(() => {
         resizeCanvas();
+        if (currentWorld.cameraFn) {
+          const view = { width: canvas.width, height: canvas.height };
+          const cam = currentWorld.cameraFn(view);
+          if (cam) {
+            camera.x = cam.x;
+            camera.y = cam.y;
+            camera.zoom = cam.zoom;
+          }
+        }
         renderState(sim.state);
-      });
+      }).observe(canvas);
       const defaultSpot = APARTMENT_PARKING_WORLD.spots.SW;
       {
         const heading = 0;
