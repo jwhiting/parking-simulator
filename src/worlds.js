@@ -1,17 +1,6 @@
 export const EMPTY_WORLD = {
   name: "Empty",
-  objects: [
-    {
-      type: "rect",
-      x: -223.8,
-      y: -223.8,
-      width: 447.6,
-      height: 447.6,
-      fill: null,
-      stroke: "#b34b2e",
-      strokeWidth: 2,
-    },
-  ],
+  objects: [],
 };
 
 function addParkingRow(objects, { x, y, spaces, stallWidth, stallDepth, angle = 0 }) {
