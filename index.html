@@ -105,6 +105,21 @@
         border-left: 1px dashed rgba(0, 0, 0, 0.25);
         border-right: 1px dashed rgba(0, 0, 0, 0.25);
       }
+      .drive-pad .sat-band {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 10%;
+        background: rgba(0, 0, 0, 0.04);
+        border-left: 1px dashed rgba(0, 0, 0, 0.18);
+        pointer-events: none;
+      }
+      .drive-pad .sat-band.right {
+        right: 0;
+      }
+      .drive-pad .sat-band.left {
+        left: 0;
+      }
       .drive-pad .reticle {
         position: absolute;
         width: 14px;
@@ -218,6 +233,8 @@
       <canvas id="canvas" resize></canvas>
       <div id="drivePad" class="drive-pad">
         <div class="center-band"></div>
+        <div class="sat-band left"></div>
+        <div class="sat-band right"></div>
         <div class="arrow up">↑<span class="label">Drive</span></div>
         <div class="arrow down">↓<span class="label">Reverse</span></div>
         <div class="arrow left">←<span class="label">Steer Left</span></div>
@@ -256,6 +273,7 @@
       const maxSteer = 32.5;
       const steerDeadBand = 0.102;
       const throttleDeadBand = 0.22;
+      const steerSatBand = 0.2;
       const throttleScale = 1;
       let driveState = { steer: 0, throttle: 0 };
 
@@ -341,7 +359,21 @@
           return Math.sign(value) * scaled;
         };
 
-        const steerNorm = applyDeadBand(steerRaw, steerDeadBand);
+        const applySteerWithSaturation = (value, deadBand, satBand) => {
+          const abs = Math.abs(value);
+          const satStart = 1 - satBand;
+          if (abs <= deadBand) {
+            return 0;
+          }
+          if (abs >= satStart) {
+            return Math.sign(value);
+          }
+          // Continuous ramp from 0 at deadBand to 1 at satStart.
+          const ramp = (abs - deadBand) / (satStart - deadBand);
+          return Math.sign(value) * ramp;
+        };
+
+        const steerNorm = applySteerWithSaturation(steerRaw, steerDeadBand, steerSatBand);
         const throttleRaw = Math.max(-1, Math.min(1, (0.5 - y) * 2));
         const throttle =
           applyDeadBand(throttleRaw, throttleDeadBand) * throttleScale;
