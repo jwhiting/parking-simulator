@@ -574,6 +574,42 @@ export const APARTMENT_PARKING_WORLD = (() => {
     }
   }
 
+  // Hard poles at unique parking-spot corner points (0.5 ft square footprint).
+  const poleSize = 6;
+  const poleHalf = poleSize / 2;
+  const cornerKeys = new Set();
+  for (let row = 0; row < 2; row += 1) {
+    for (let col = 0; col < 2; col += 1) {
+      const sx = spotsLeft + col * spotWidth;
+      const sy = spotsTopRowY - row * spotHeight;
+      const corners = [
+        { x: sx, y: sy },
+        { x: sx + spotWidth, y: sy },
+        { x: sx, y: sy + spotHeight },
+        { x: sx + spotWidth, y: sy + spotHeight },
+      ];
+      for (const c of corners) {
+        cornerKeys.add(`${c.x},${c.y}`);
+      }
+    }
+  }
+  for (const key of cornerKeys) {
+    const [xStr, yStr] = key.split(",");
+    const x = Number(xStr);
+    const y = Number(yStr);
+    objects.push({
+      type: "rect",
+      x: x - poleHalf,
+      y: y - poleHalf,
+      width: poleSize,
+      height: poleSize,
+      fill: "#6d6257",
+      stroke: "#4f453c",
+      strokeWidth: 1,
+      solid: true,
+    });
+  }
+
   return {
     name: "Apartment Parking",
     objects,
