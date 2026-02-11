@@ -100,6 +100,13 @@
         <button id="forward" class="primary">Forward</button>
         <button id="backward">Backward</button>
       </div>
+      <div class="row">
+        <button id="worldEmpty">Empty World</button>
+        <button id="worldLot">Parking Lot</button>
+      </div>
+      <div class="row">
+        <button id="worldTight">Tight Lot</button>
+      </div>
       <div class="control">
         <label>Status</label>
         <div class="status" id="statusText">Booting...</div>
@@ -111,6 +118,7 @@
     <script type="module">
       import { Simulator, VehicleState } from "../src/core.js";
       import { PaperRenderer } from "../src/renderer.js";
+      import { EMPTY_WORLD, PARKING_LOT_WORLD, TIGHT_PARKING_LOT_WORLD } from "../src/worlds.js";
 
       const canvas = document.getElementById("canvas");
 
@@ -139,11 +147,13 @@
       }
 
       const camera = { x: 0, y: 0, zoom: 65 };
+      let currentWorld = EMPTY_WORLD;
 
       function renderState(state) {
         renderer.render(state, sim.model, {
           scale: camera.zoom,
           camera: { x: camera.x, y: camera.y },
+          world: currentWorld,
         });
         statusText.textContent = `x=${state.x.toFixed(2)}, y=${state.y.toFixed(2)}, heading=${(state.heading * 180 / Math.PI).toFixed(1)}°`;
       }
@@ -190,6 +200,21 @@
 
       document.getElementById("reset").addEventListener("click", () => {
         reset();
+      });
+
+      document.getElementById("worldEmpty").addEventListener("click", () => {
+        currentWorld = EMPTY_WORLD;
+        renderState(sim.state);
+      });
+
+      document.getElementById("worldLot").addEventListener("click", () => {
+        currentWorld = PARKING_LOT_WORLD;
+        renderState(sim.state);
+      });
+
+      document.getElementById("worldTight").addEventListener("click", () => {
+        currentWorld = TIGHT_PARKING_LOT_WORLD;
+        renderState(sim.state);
       });
 
       let isPanning = false;

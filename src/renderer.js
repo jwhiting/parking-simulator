@@ -6,6 +6,7 @@ export class PaperRenderer {
     this.config = config;
     this.layers = {
       background: new this.paper.Layer(),
+      world: new this.paper.Layer(),
       car: new this.paper.Layer(),
       overlay: new this.paper.Layer(),
     };
@@ -19,6 +20,7 @@ export class PaperRenderer {
   }
 
   clear() {
+    this.layers.world.removeChildren();
     this.layers.car.removeChildren();
     this.layers.overlay.removeChildren();
   }
@@ -30,6 +32,7 @@ export class PaperRenderer {
       showContactCircles = true,
       scale = 60,
       camera = { x: 0, y: 0 },
+      world = null,
     } = options;
 
     const carGroup = new this.paper.Group();
@@ -39,6 +42,10 @@ export class PaperRenderer {
     const wheels = this._drawWheels(state, model);
 
     carGroup.addChildren([body, ...wheels]);
+
+    if (world) {
+      this._drawWorld(world);
+    }
 
     this.layers.car.addChild(carGroup);
 
@@ -306,5 +313,46 @@ export class PaperRenderer {
       outer,
       inner,
     ]);
+  }
+
+  _drawWorld(world) {
+    const layer = this.layers.world;
+    if (!world || !world.objects) {
+      return;
+    }
+
+    world.objects.forEach((obj) => {
+      if (obj.type === "rect") {
+        const path = new this.paper.Path.Rectangle({
+          from: new this.paper.Point(obj.x, -obj.y),
+          to: new this.paper.Point(obj.x + obj.width, -(obj.y + obj.height)),
+          fillColor: obj.fill || null,
+          strokeColor: obj.stroke || null,
+          strokeWidth: obj.strokeWidth || 0.02,
+        });
+        if (obj.rotation) {
+          path.rotate(-obj.rotation);
+        }
+        layer.addChild(path);
+      } else if (obj.type === "line") {
+        const path = new this.paper.Path.Line({
+          from: new this.paper.Point(obj.x1, -obj.y1),
+          to: new this.paper.Point(obj.x2, -obj.y2),
+          strokeColor: obj.stroke || "#d6d1c9",
+          strokeWidth: obj.strokeWidth || 0.03,
+          dashArray: obj.dash || null,
+        });
+        layer.addChild(path);
+      } else if (obj.type === "poly") {
+        const path = new this.paper.Path({
+          segments: obj.points.map((p) => new this.paper.Point(p.x, -p.y)),
+          closed: true,
+          fillColor: obj.fill || null,
+          strokeColor: obj.stroke || null,
+          strokeWidth: obj.strokeWidth || 0.02,
+        });
+        layer.addChild(path);
+      }
+    });
   }
 }
