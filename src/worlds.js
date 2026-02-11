@@ -284,8 +284,8 @@ export const APARTMENT_PARKING_WORLD = (() => {
   const spotsLeft = -spotWidth;
   const spotsTopRowY = lotTop - spotHeight;
   const spotsBottomRowY = spotsTopRowY - spotHeight;
-  const seSpotCenter = {
-    x: spotWidth / 2,
+  const swSpotCenter = {
+    x: -spotWidth / 2,
     y: spotsBottomRowY + spotHeight / 2,
   };
 
@@ -445,12 +445,13 @@ export const APARTMENT_PARKING_WORLD = (() => {
   }
 
   const rearOverhang = 41.3;
+  const carCenterX = carLength / 2 - rearOverhang;
   return {
     name: "Apartment Parking",
     objects,
     offset: {
-      x: -rearOverhang,
-      y: -seSpotCenter.y,
+      x: carCenterX - swSpotCenter.x,
+      y: -swSpotCenter.y,
     },
   };
 })();

@@ -199,8 +199,8 @@
       const throttleScale = 1;
       let driveState = { steer: 0, throttle: 0 };
 
-      const camera = { x: 0, y: 0, zoom: 1.7 };
-      let currentWorld = EMPTY_WORLD;
+      const camera = { x: 0, y: 0, zoom: 0.6 };
+      let currentWorld = APARTMENT_PARKING_WORLD;
 
       function renderState(state) {
         renderer.render(state, sim.model, {
@@ -355,8 +355,10 @@
         resizeCanvas();
         renderState(sim.state);
       });
-      updateSteerDisplay();
-      reset();
+      currentWorld = APARTMENT_PARKING_WORLD;
+      requestAnimationFrame(() => {
+        reset();
+      });
     </script>
   </body>
 </html>
