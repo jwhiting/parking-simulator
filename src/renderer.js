@@ -99,9 +99,9 @@ export class PaperRenderer {
     const front = rear + bodyLength;
     const halfWidth = bodyWidth / 2;
 
-    const windshieldMargin = 0.18;
+    const windshieldMargin = 6;
     const windshieldDepth = wheelLength;
-    const windshieldFrontX = wheelbase - 0.45;
+    const windshieldFrontX = wheelbase - 0.45 - 12;
     const windshieldRearX = windshieldFrontX - windshieldDepth;
     const windshieldLocal = [
       { x: windshieldRearX, y: halfWidth - windshieldMargin },
@@ -115,18 +115,18 @@ export class PaperRenderer {
       closed: true,
       fillColor: "#2b3a45",
       strokeColor: "#111111",
-      strokeWidth: 0.02,
+      strokeWidth: 1,
     });
 
     const driverLocalX = (windshieldFrontX + windshieldRearX) / 2;
-    const driverLocalY = Math.min(halfWidth * 0.45, halfWidth - windshieldMargin - 0.05);
+    const driverLocalY = Math.min(halfWidth * 0.45, halfWidth - windshieldMargin - 4);
     const driverWorld = model.toWorld(state, driverLocalX, driverLocalY);
     const driver = new this.paper.Path.Circle({
       center: new this.paper.Point(driverWorld.x, -driverWorld.y),
-      radius: 0.1,
+      radius: 4,
       fillColor: "#d9b39a",
       strokeColor: "#6d5348",
-      strokeWidth: 0.02,
+      strokeWidth: 1,
     });
 
     const group = new this.paper.Group([path, outline, windshield, driver]);
@@ -247,7 +247,7 @@ export class PaperRenderer {
         center: new this.paper.Point(iccX, -iccY),
         radius,
         strokeColor: "#b34b2e",
-        strokeWidth: 0.05,
+        strokeWidth: 2,
         fillColor: null,
         opacity: 0.8,
       });
@@ -280,7 +280,7 @@ export class PaperRenderer {
       x: Math.cos(state.heading),
       y: Math.sin(state.heading),
     };
-    const lineSpan = 25;
+    const lineSpan = model.config.bodyLength * 3;
 
     const lineThrough = (point, color, width, opacity = 0.2) =>
       new this.paper.Path.Line({
@@ -302,8 +302,8 @@ export class PaperRenderer {
     const frontLeft = lineThrough(wheels.frontLeft, "#3a9f66", wheelWidth, 0.2);
     const frontRight = lineThrough(wheels.frontRight, "#3a9f66", wheelWidth, 0.2);
 
-    const outer = lineThrough(outerChassisPoint, "#b34b2e", 0.05, 0.8);
-    const inner = lineThrough(innerChassisPoint, "#b34b2e", 0.05, 0.8);
+    const outer = lineThrough(outerChassisPoint, "#b34b2e", 2, 0.8);
+    const inner = lineThrough(innerChassisPoint, "#b34b2e", 2, 0.8);
 
     return new this.paper.Group([
       rearLeft,

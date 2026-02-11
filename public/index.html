@@ -149,7 +149,7 @@
         steerValue.textContent = `${steerInput.value}°`;
       }
 
-      const camera = { x: 0, y: 0, zoom: 65 };
+      const camera = { x: 0, y: 0, zoom: 1.7 };
       let currentWorld = EMPTY_WORLD;
 
       function renderState(state) {
@@ -176,7 +176,7 @@
       const forwardBtn = document.getElementById("forward");
       const backwardBtn = document.getElementById("backward");
       const frameMs = 50;
-      const stepPerFrame = 0.1;
+      const stepPerFrame = 4;
       let driveTimer = null;
 
       function startDrive(direction) {
@@ -256,7 +256,7 @@
       canvas.addEventListener("wheel", (event) => {
         event.preventDefault();
         const factor = Math.exp(-event.deltaY * 0.001);
-        const nextZoom = Math.max(25, Math.min(200, camera.zoom * factor));
+        const nextZoom = Math.max(0.2, Math.min(6, camera.zoom * factor));
         camera.zoom = nextZoom;
         renderState(sim.state);
       }, { passive: false });

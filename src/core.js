@@ -1,13 +1,13 @@
 export const DEFAULT_CONFIG = {
-  wheelbase: 2.9,
-  track: 1.65,
-  bodyLength: 4.8,
-  bodyWidth: 2.0,
-  frontOverhang: 0.9,
-  rearOverhang: 1.0,
-  wheelLength: 0.7,
-  wheelWidth: 0.25,
-  maxSteerDeg: 40,
+  wheelbase: 106.3,
+  track: 60.6,
+  bodyLength: 184.8,
+  bodyWidth: 73.5,
+  frontOverhang: 37.2,
+  rearOverhang: 41.3,
+  wheelLength: 27.0,
+  wheelWidth: 9.2,
+  maxSteerDeg: 32.5,
 };
 
 export const degToRad = (deg) => (deg * Math.PI) / 180;

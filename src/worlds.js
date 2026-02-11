@@ -1,6 +1,17 @@
 export const EMPTY_WORLD = {
   name: "Empty",
-  objects: [],
+  objects: [
+    {
+      type: "rect",
+      x: -223.8,
+      y: -223.8,
+      width: 447.6,
+      height: 447.6,
+      fill: null,
+      stroke: "#b34b2e",
+      strokeWidth: 2,
+    },
+  ],
 };
 
 function addParkingRow(objects, { x, y, spaces, stallWidth, stallDepth, angle = 0 }) {
@@ -35,12 +46,15 @@ function addParkedCar(objects, { x, y, width, height, color = "#9aa3a9" }) {
 
 export const PARKING_LOT_WORLD = (() => {
   const objects = [];
-  const stallWidth = 3.0;
-  const stallDepth = 5.6;
-  const carWidth = 2.0;
-  const carLength = 4.8;
-  const lotWidth = 44;
-  const lotHeight = 40;
+  const carWidth = 73.5;
+  const carLength = 184.8;
+  const stallWidth = carWidth * 1.5;
+  const stallDepth = carLength * (5.6 / 4.8);
+  const spaces = 10;
+  const stallMargin = stallWidth * 3.8;
+  const lotWidth = spaces * stallWidth + stallMargin * 2;
+  const lotHeight = stallDepth * (40 / 5.6);
+  const stroke = carWidth * 0.015;
 
   // asphalt background
   objects.push({
@@ -51,7 +65,7 @@ export const PARKING_LOT_WORLD = (() => {
     height: lotHeight,
     fill: "#dad3c9",
     stroke: "#cbbfb2",
-    strokeWidth: 0.05,
+    strokeWidth: stroke * 1.5,
   });
 
   // center driving lane lines
@@ -62,34 +76,35 @@ export const PARKING_LOT_WORLD = (() => {
     x2: lotWidth / 2 - 2,
     y2: 0,
     stroke: "#c7bcae",
-    strokeWidth: 0.05,
-    dash: [0.3, 0.35],
+    strokeWidth: stroke * 1.5,
+    dash: [carWidth * 0.15, carWidth * 0.175],
   });
 
   // parking rows (top and bottom)
+  const rowOffset = stallDepth * (2.2 / 5.2);
   addParkingRow(objects, {
-    x: -18,
-    y: 3.0,
-    spaces: 10,
+    x: -lotWidth / 2 + stallWidth * 2.8,
+    y: rowOffset,
+    spaces,
     stallWidth,
     stallDepth,
   });
   addParkingRow(objects, {
-    x: -18,
-    y: -(stallDepth + 3.0),
-    spaces: 10,
+    x: -lotWidth / 2 + stallWidth * 2.8,
+    y: -stallDepth * (7.4 / 5.2),
+    spaces,
     stallWidth,
     stallDepth,
   });
 
   // parked cars top row
-  for (let i = 0; i < 10; i += 1) {
+  for (let i = 0; i < spaces; i += 1) {
     if (i === 3 || i === 6) {
       continue; // open spots
     }
     addParkedCar(objects, {
-      x: -18 + i * stallWidth + (stallWidth - carWidth) / 2,
-      y: 3.2,
+      x: -lotWidth / 2 + stallWidth * 2.8 + i * stallWidth + (stallWidth - carWidth) / 2,
+      y: rowOffset + carWidth * 0.2,
       width: carWidth,
       height: carLength,
       color: i % 2 === 0 ? "#9aa3a9" : "#8d8a85",
@@ -97,13 +112,13 @@ export const PARKING_LOT_WORLD = (() => {
   }
 
   // parked cars bottom row
-  for (let i = 0; i < 10; i += 1) {
+  for (let i = 0; i < spaces; i += 1) {
     if (i === 4 || i === 8) {
       continue; // open spots
     }
     addParkedCar(objects, {
-      x: -18 + i * stallWidth + (stallWidth - carWidth) / 2,
-      y: -(stallDepth + 2.7),
+      x: -lotWidth / 2 + stallWidth * 2.8 + i * stallWidth + (stallWidth - carWidth) / 2,
+      y: -(stallDepth * (7.4 / 5.2) - carWidth * 0.2),
       width: carWidth,
       height: carLength,
       color: i % 2 === 0 ? "#a28a78" : "#7f8a8f",
@@ -113,23 +128,23 @@ export const PARKING_LOT_WORLD = (() => {
   // curbs
   objects.push({
     type: "rect",
-    x: -lotWidth / 2 + 1,
-    y: stallDepth + 4.5,
-    width: lotWidth - 2,
-    height: 0.6,
+    x: -lotWidth / 2 + carWidth,
+    y: stallDepth * (8.2 / 5.2),
+    width: lotWidth - carWidth * 2,
+    height: carWidth * 0.3,
     fill: "#bfb3a5",
     stroke: "#a89988",
-    strokeWidth: 0.02,
+    strokeWidth: stroke,
   });
   objects.push({
     type: "rect",
-    x: -lotWidth / 2 + 1,
-    y: -(stallDepth + 5.1),
-    width: lotWidth - 2,
-    height: 0.6,
+    x: -lotWidth / 2 + carWidth,
+    y: -stallDepth * (8.7 / 5.2),
+    width: lotWidth - carWidth * 2,
+    height: carWidth * 0.3,
     fill: "#bfb3a5",
     stroke: "#a89988",
-    strokeWidth: 0.02,
+    strokeWidth: stroke,
   });
 
   return {
@@ -140,12 +155,15 @@ export const PARKING_LOT_WORLD = (() => {
 
 export const TIGHT_PARKING_LOT_WORLD = (() => {
   const objects = [];
-  const stallWidth = 2.6;
-  const stallDepth = 5.2;
-  const carWidth = 2.0;
-  const carLength = 4.8;
-  const lotWidth = 40;
-  const lotHeight = 36;
+  const carWidth = 73.5;
+  const carLength = 184.8;
+  const stallWidth = carWidth * 1.3;
+  const stallDepth = carLength * (5.2 / 4.8);
+  const spaces = 10;
+  const stallMargin = stallWidth * (7 / 2.6);
+  const lotWidth = spaces * stallWidth + stallMargin * 2;
+  const lotHeight = stallDepth * (36 / 5.2);
+  const stroke = carWidth * 0.015;
 
   objects.push({
     type: "rect",
@@ -155,7 +173,7 @@ export const TIGHT_PARKING_LOT_WORLD = (() => {
     height: lotHeight,
     fill: "#dad3c9",
     stroke: "#cbbfb2",
-    strokeWidth: 0.05,
+    strokeWidth: stroke * 1.5,
   });
 
   objects.push({
@@ -165,45 +183,46 @@ export const TIGHT_PARKING_LOT_WORLD = (() => {
     x2: lotWidth / 2 - 2,
     y2: 0,
     stroke: "#c7bcae",
-    strokeWidth: 0.05,
-    dash: [0.3, 0.35],
+    strokeWidth: stroke * 1.5,
+    dash: [carWidth * 0.15, carWidth * 0.175],
   });
 
+  const rowOffset = stallDepth * 0.5;
   addParkingRow(objects, {
-    x: -16.5,
-    y: 2.6,
-    spaces: 10,
+    x: -lotWidth / 2 + stallWidth * (3.5 / 2.6),
+    y: rowOffset,
+    spaces,
     stallWidth,
     stallDepth,
   });
   addParkingRow(objects, {
-    x: -16.5,
-    y: -(stallDepth + 2.6),
-    spaces: 10,
+    x: -lotWidth / 2 + stallWidth * (3.5 / 2.6),
+    y: -stallDepth * 1.5,
+    spaces,
     stallWidth,
     stallDepth,
   });
 
-  for (let i = 0; i < 10; i += 1) {
+  for (let i = 0; i < spaces; i += 1) {
     if (i === 4 || i === 7) {
       continue;
     }
     addParkedCar(objects, {
-      x: -16.5 + i * stallWidth + (stallWidth - carWidth) / 2,
-      y: 2.9,
+      x: -lotWidth / 2 + stallWidth * (3.5 / 2.6) + i * stallWidth + (stallWidth - carWidth) / 2,
+      y: rowOffset + carWidth * 0.2,
       width: carWidth,
       height: carLength,
       color: i % 2 === 0 ? "#9aa3a9" : "#8d8a85",
     });
   }
 
-  for (let i = 0; i < 10; i += 1) {
+  for (let i = 0; i < spaces; i += 1) {
     if (i === 2 || i === 8) {
       continue;
     }
     addParkedCar(objects, {
-      x: -16.5 + i * stallWidth + (stallWidth - carWidth) / 2,
-      y: -(stallDepth + 2.3),
+      x: -lotWidth / 2 + stallWidth * (3.5 / 2.6) + i * stallWidth + (stallWidth - carWidth) / 2,
+      y: -stallDepth * 1.5 + carWidth * 0.2,
       width: carWidth,
       height: carLength,
       color: i % 2 === 0 ? "#a28a78" : "#7f8a8f",
@@ -212,23 +231,23 @@ export const TIGHT_PARKING_LOT_WORLD = (() => {
 
   objects.push({
     type: "rect",
-    x: -lotWidth / 2 + 1,
-    y: stallDepth + 4.0,
-    width: lotWidth - 2,
-    height: 0.6,
+    x: -lotWidth / 2 + carWidth,
+    y: rowOffset + stallDepth + carWidth * 0.3,
+    width: lotWidth - carWidth * 2,
+    height: 6,
     fill: "#bfb3a5",
     stroke: "#a89988",
-    strokeWidth: 0.02,
+    strokeWidth: stroke,
   });
   objects.push({
     type: "rect",
-    x: -lotWidth / 2 + 1,
-    y: -(stallDepth + 4.4),
-    width: lotWidth - 2,
-    height: 0.6,
+    x: -lotWidth / 2 + carWidth,
+    y: -stallDepth * 1.5 - carWidth * 0.6,
+    width: lotWidth - carWidth * 2,
+    height: 6,
     fill: "#bfb3a5",
     stroke: "#a89988",
-    strokeWidth: 0.02,
+    strokeWidth: stroke,
   });
 
   return {
@@ -239,8 +258,8 @@ export const TIGHT_PARKING_LOT_WORLD = (() => {
 
 export const APARTMENT_PARKING_WORLD = (() => {
   const objects = [];
-  const carWidth = 2.0;
-  const carLength = 4.8;
+  const carWidth = 73.5;
+  const carLength = 184.8;
   const buildingWidth = 4 * carLength;
   const buildingHeight = 1.5 * carLength;
   const drivewayPadding = carWidth * 0.2;
@@ -249,9 +268,9 @@ export const APARTMENT_PARKING_WORLD = (() => {
   const gap = carWidth * 0.5;
   const lotHeight = 2 * carWidth + 3 * gap;
   const totalWidth = buildingWidth + 2 * drivewayWidth;
-  const roadHeight = carWidth + 1.2;
+  const roadHeight = carWidth * 1.6;
 
-  const buildingTop = 6.0;
+  const buildingTop = carWidth * 3;
   const buildingBottom = buildingTop - buildingHeight;
   const courtyardTop = buildingBottom;
   const courtyardBottom = courtyardTop - courtyardHeight;
@@ -266,25 +285,25 @@ export const APARTMENT_PARKING_WORLD = (() => {
   // ground
   objects.push({
     type: "rect",
-    x: -totalWidth / 2 - 2,
-    y: lotBottom - 4,
-    width: totalWidth + 4,
-    height: (buildingTop + roadHeight) - (lotBottom - 4),
+    x: -totalWidth / 2 - carWidth,
+    y: lotBottom - carWidth * 2,
+    width: totalWidth + carWidth * 2,
+    height: (buildingTop + roadHeight) - (lotBottom - carWidth * 2),
     fill: "#dad3c9",
     stroke: "#cbbfb2",
-    strokeWidth: 0.05,
+    strokeWidth: carWidth * 0.015,
   });
 
   // road north of building
   objects.push({
     type: "rect",
-    x: -totalWidth / 2 - 2,
+    x: -totalWidth / 2 - carWidth,
     y: buildingTop,
-    width: totalWidth + 4,
+    width: totalWidth + carWidth * 2,
     height: roadHeight,
     fill: "#e2d9cf",
     stroke: "#c7bcae",
-    strokeWidth: 0.03,
+    strokeWidth: carWidth * 0.012,
   });
 
   // building block
@@ -296,7 +315,7 @@ export const APARTMENT_PARKING_WORLD = (() => {
     height: buildingHeight,
     fill: "#c5b8a9",
     stroke: "#9a8b7c",
-    strokeWidth: 0.04,
+    strokeWidth: carWidth * 0.012,
   });
 
   // driveways left/right (north to south along building + courtyard)
@@ -308,7 +327,7 @@ export const APARTMENT_PARKING_WORLD = (() => {
     height: buildingHeight + courtyardHeight,
     fill: "#e2d9cf",
     stroke: "#c7bcae",
-    strokeWidth: 0.03,
+    strokeWidth: carWidth * 0.012,
   });
   objects.push({
     type: "rect",
@@ -318,7 +337,7 @@ export const APARTMENT_PARKING_WORLD = (() => {
     height: buildingHeight + courtyardHeight,
     fill: "#e2d9cf",
     stroke: "#c7bcae",
-    strokeWidth: 0.03,
+    strokeWidth: carWidth * 0.012,
   });
 
   // courtyard walls (lines)
@@ -329,7 +348,7 @@ export const APARTMENT_PARKING_WORLD = (() => {
     x2: buildingWidth / 2,
     y2: courtyardTop,
     stroke: "#9a8b7c",
-    strokeWidth: 0.06,
+    strokeWidth: carWidth * 0.02,
   });
   objects.push({
     type: "line",
@@ -338,7 +357,7 @@ export const APARTMENT_PARKING_WORLD = (() => {
     x2: buildingWidth / 2,
     y2: courtyardBottom,
     stroke: "#9a8b7c",
-    strokeWidth: 0.06,
+    strokeWidth: carWidth * 0.02,
   });
   objects.push({
     type: "line",
@@ -347,7 +366,7 @@ export const APARTMENT_PARKING_WORLD = (() => {
     x2: -buildingWidth / 2,
     y2: courtyardTop,
     stroke: "#9a8b7c",
-    strokeWidth: 0.06,
+    strokeWidth: carWidth * 0.02,
   });
   objects.push({
     type: "line",
@@ -356,7 +375,7 @@ export const APARTMENT_PARKING_WORLD = (() => {
     x2: buildingWidth / 2,
     y2: courtyardTop,
     stroke: "#9a8b7c",
-    strokeWidth: 0.06,
+    strokeWidth: carWidth * 0.02,
   });
 
   // rear parking lot pad
@@ -368,7 +387,7 @@ export const APARTMENT_PARKING_WORLD = (() => {
     height: lotHeight,
     fill: "#e2d9cf",
     stroke: "#c7bcae",
-    strokeWidth: 0.03,
+    strokeWidth: carWidth * 0.012,
   });
 
   // 2x2 dotted divider lines
@@ -379,8 +398,8 @@ export const APARTMENT_PARKING_WORLD = (() => {
     x2: 0,
     y2: lotTop,
     stroke: "#c7bcae",
-    strokeWidth: 0.04,
-    dash: [0.3, 0.25],
+    strokeWidth: carWidth * 0.014,
+    dash: [carWidth * 0.15, carWidth * 0.12],
   });
   objects.push({
     type: "line",
@@ -389,11 +408,11 @@ export const APARTMENT_PARKING_WORLD = (() => {
     x2: totalWidth / 2,
     y2: midY,
     stroke: "#c7bcae",
-    strokeWidth: 0.04,
-    dash: [0.3, 0.25],
+    strokeWidth: carWidth * 0.014,
+    dash: [carWidth * 0.15, carWidth * 0.12],
   });
 
-  const rearOverhang = 1.0;
+  const rearOverhang = 41.3;
   return {
     name: "Apartment Parking",
     objects,
