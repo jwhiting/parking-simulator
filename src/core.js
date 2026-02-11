@@ -220,6 +220,37 @@ export function buildPlaybook(commands) {
   return commands.map((cmd) => ({ ...cmd }));
 }
 
+export function projectForwardUntilCollision(
+  state,
+  model,
+  world,
+  { maxDistance = 50 * 12, step = 2, direction = 1 } = {}
+) {
+  if (!world || !world.objects) {
+    return null;
+  }
+  const probe = state.clone();
+  let lastSafe = state.clone();
+  let traversed = 0;
+  let hit = false;
+
+  while (traversed < maxDistance) {
+    const stepDist = Math.min(step, maxDistance - traversed);
+    model.move(probe, stepDist * (direction >= 0 ? 1 : -1));
+    traversed += stepDist;
+    if (detectCollision(probe, model, world)) {
+      hit = true;
+      break;
+    }
+    lastSafe = probe.clone();
+  }
+
+  if (!hit) {
+    return null;
+  }
+  return lastSafe;
+}
+
 function rectToPoly(rect) {
   return [
     { x: rect.x, y: rect.y },

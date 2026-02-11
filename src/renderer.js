@@ -34,15 +34,35 @@ export class PaperRenderer {
       camera = { x: 0, y: 0 },
       world = null,
       collisionPoint = null,
+      ghostForwardState = null,
+      ghostBackwardState = null,
+      ghostMaxDistance = 50 * 12,
     } = options;
 
     const carGroup = new this.paper.Group();
     carGroup.applyMatrix = false;
 
+    const ghostItems = [];
+    if (ghostForwardState) {
+      const alpha = this._ghostAlpha(state, ghostForwardState, model, ghostMaxDistance);
+      const ghost = this._drawGhostVehicle(ghostForwardState, model, {
+        stroke: new this.paper.Color(0.82, 0.12, 0.12, alpha),
+        fill: new this.paper.Color(0.82, 0.12, 0.12, alpha * 0.08),
+      });
+      ghostItems.push(ghost);
+    }
+    if (ghostBackwardState) {
+      const alpha = this._ghostAlpha(state, ghostBackwardState, model, ghostMaxDistance);
+      const ghost = this._drawGhostVehicle(ghostBackwardState, model, {
+        stroke: new this.paper.Color(0.82, 0.12, 0.12, alpha),
+        fill: new this.paper.Color(0.82, 0.12, 0.12, alpha * 0.08),
+      });
+      ghostItems.push(ghost);
+    }
+
     const body = this._drawBody(state, model);
     const wheels = this._drawWheels(state, model);
-
-    carGroup.addChildren([body, ...wheels]);
+    carGroup.addChildren([...ghostItems, body, ...wheels]);
 
     if (world) {
       this._drawWorld(world);
@@ -159,6 +179,38 @@ export class PaperRenderer {
 
     const group = new this.paper.Group([path, outline, windshield, driver]);
     return group;
+  }
+
+  _drawGhostVehicle(state, model, palette) {
+    const poly = model.getBodyPolygon(state);
+    const body = new this.paper.Path({
+      segments: poly.map((p) => new this.paper.Point(p.x, -p.y)),
+      closed: true,
+      strokeColor: palette.stroke,
+      strokeWidth: 5,
+      dashArray: [10, 6],
+      fillColor: palette.fill,
+    });
+
+    const wheels = model.getWheelPositions(state);
+    const wheelMarkers = Object.values(wheels).map((w) =>
+      new this.paper.Path.Circle({
+        center: new this.paper.Point(w.x, -w.y),
+        radius: 4,
+        strokeColor: palette.stroke,
+        strokeWidth: 1,
+        fillColor: null,
+      })
+    );
+    return new this.paper.Group([body, ...wheelMarkers]);
+  }
+
+  _ghostAlpha(realState, ghostState, model, maxDistance) {
+    const a = model.getCenterOfBody(realState);
+    const b = model.getCenterOfBody(ghostState);
+    const d = Math.hypot(a.x - b.x, a.y - b.y);
+    const t = Math.max(0, Math.min(1, 1 - d / maxDistance));
+    return Math.pow(t, 6);
   }
 
   _drawWheels(state, model) {

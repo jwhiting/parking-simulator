@@ -180,6 +180,16 @@
       .status {
         font-size: 0.9rem;
       }
+      .check-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .check-row label {
+        font-size: 0.85rem;
+        letter-spacing: 0.02em;
+        text-transform: none;
+      }
       @media (max-width: 900px) {
         body {
           grid-template-columns: 1fr;
@@ -202,6 +212,17 @@
       <div class="control">
         <label>Drive Pad</label>
         <div class="status">Use the on-canvas pad to steer/throttle</div>
+      </div>
+      <div class="control">
+        <label>Overlays</label>
+        <div class="check-row">
+          <input id="toggleProjectedCollisions" type="checkbox" checked />
+          <label for="toggleProjectedCollisions">Project Collisions</label>
+        </div>
+        <div class="check-row">
+          <input id="toggleSweepProjections" type="checkbox" checked />
+          <label for="toggleSweepProjections">Project Curves</label>
+        </div>
       </div>
       <div class="row">
         <button id="worldEmpty" data-world="Empty">Empty World</button>
@@ -244,7 +265,7 @@
     </div>
 
     <script type="module">
-      import { Simulator, VehicleState } from "./src/core.js";
+      import { Simulator, VehicleState, projectForwardUntilCollision } from "./src/core.js";
       import { PaperRenderer } from "./src/renderer.js";
       import { EMPTY_WORLD, PARKING_LOT_WORLD, TIGHT_PARKING_LOT_WORLD, APARTMENT_PARKING_WORLD } from "./src/worlds.js";
 
@@ -267,6 +288,8 @@
       const drivePad = document.getElementById("drivePad");
       const reticle = document.getElementById("reticle");
       const statusText = document.getElementById("statusText");
+      const toggleProjectedCollisions = document.getElementById("toggleProjectedCollisions");
+      const toggleSweepProjections = document.getElementById("toggleSweepProjections");
 
       let startState = new VehicleState();
 
@@ -276,16 +299,38 @@
       const steerSatBand = 0.2;
       const throttleScale = 1;
       let driveState = { steer: 0, throttle: 0 };
+      let showProjectedCollisions = true;
+      let showSweepProjections = true;
 
       const camera = { x: 0, y: 0, zoom: 0.6 };
       let currentWorld = APARTMENT_PARKING_WORLD;
 
       function renderState(state) {
+        let ghostForwardState = null;
+        let ghostBackwardState = null;
+        if (showProjectedCollisions) {
+          const projectedForward = projectForwardUntilCollision(state, sim.model, currentWorld, {
+            maxDistance: 30 * 12,
+            step: 0.5,
+            direction: 1,
+          });
+          const projectedBackward = projectForwardUntilCollision(state, sim.model, currentWorld, {
+            maxDistance: 30 * 12,
+            step: 0.5,
+            direction: -1,
+          });
+          ghostForwardState = driveState.throttle < 0 ? null : projectedForward;
+          ghostBackwardState = driveState.throttle > 0 ? null : projectedBackward;
+        }
         renderer.render(state, sim.model, {
           scale: camera.zoom,
           camera: { x: camera.x, y: camera.y },
           world: currentWorld,
           collisionPoint: sim.lastCollision,
+          showContactCircles: showSweepProjections,
+          ghostForwardState,
+          ghostBackwardState,
+          ghostMaxDistance: 30 * 12,
         });
         statusText.textContent = `x=${state.x.toFixed(2)}, y=${state.y.toFixed(2)}, heading=${(state.heading * 180 / Math.PI).toFixed(1)}°`;
       }
@@ -411,6 +456,16 @@
 
       document.getElementById("reset").addEventListener("click", () => {
         reset();
+      });
+
+      toggleProjectedCollisions.addEventListener("change", () => {
+        showProjectedCollisions = toggleProjectedCollisions.checked;
+        renderState(sim.state);
+      });
+
+      toggleSweepProjections.addEventListener("change", () => {
+        showSweepProjections = toggleSweepProjections.checked;
+        renderState(sim.state);
       });
 
       document.getElementById("worldEmpty").addEventListener("click", () => {
