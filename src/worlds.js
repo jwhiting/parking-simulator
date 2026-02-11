@@ -425,6 +425,25 @@ export const APARTMENT_PARKING_WORLD = (() => {
     }
   }
 
+  // dotted car outlines centered in each spot
+  const dottedCarWidth = carLength;
+  const dottedCarHeight = carWidth;
+  for (let row = 0; row < 2; row += 1) {
+    for (let col = 0; col < 2; col += 1) {
+      objects.push({
+        type: "rect",
+        x: spotsLeft + col * spotWidth + (spotWidth - dottedCarWidth) / 2,
+        y: spotsTopRowY - row * spotHeight + (spotHeight - dottedCarHeight) / 2,
+        width: dottedCarWidth,
+        height: dottedCarHeight,
+        fill: null,
+        stroke: "#b2a79b",
+        strokeWidth: carWidth * 0.015,
+        dash: [18, 12],
+      });
+    }
+  }
+
   const rearOverhang = 41.3;
   return {
     name: "Apartment Parking",
