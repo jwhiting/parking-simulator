@@ -296,9 +296,20 @@ export const APARTMENT_PARKING_WORLD = (() => {
     y: lotBottom - carWidth * 2,
     width: totalWidth + carWidth * 2,
     height: (buildingTop + roadHeight) - (lotBottom - carWidth * 2),
-    fill: "#dad3c9",
+    fill: "#f3eee6",
     stroke: "#cbbfb2",
     strokeWidth: carWidth * 0.015,
+  });
+
+  // gravel pad (driveways + parking area)
+  objects.push({
+    type: "rect",
+    x: -totalWidth / 2,
+    y: lotBottom,
+    width: totalWidth,
+    height: (buildingTop - lotBottom),
+    fill: "#c2beb6",
+    stroke: null,
   });
 
   // road north of building
@@ -308,7 +319,7 @@ export const APARTMENT_PARKING_WORLD = (() => {
     y: buildingTop,
     width: totalWidth + carWidth * 2,
     height: roadHeight,
-    fill: "#e2d9cf",
+    fill: "#c2beb6",
     stroke: "#c7bcae",
     strokeWidth: carWidth * 0.012,
   });
@@ -320,7 +331,7 @@ export const APARTMENT_PARKING_WORLD = (() => {
     y: buildingBottom,
     width: buildingWidth,
     height: buildingHeight,
-    fill: "#c5b8a9",
+    fill: "#ffffff",
     stroke: "#9a8b7c",
     strokeWidth: carWidth * 0.012,
   });
@@ -332,7 +343,7 @@ export const APARTMENT_PARKING_WORLD = (() => {
     y: courtyardBottom,
     width: drivewayWidth,
     height: buildingHeight + courtyardHeight,
-    fill: "#e2d9cf",
+    fill: null,
     stroke: "#c7bcae",
     strokeWidth: carWidth * 0.012,
   });
@@ -342,6 +353,18 @@ export const APARTMENT_PARKING_WORLD = (() => {
     y: courtyardBottom,
     width: drivewayWidth,
     height: buildingHeight + courtyardHeight,
+    fill: null,
+    stroke: "#c7bcae",
+    strokeWidth: carWidth * 0.012,
+  });
+
+  // courtyard fill
+  objects.push({
+    type: "rect",
+    x: courtyardLeft,
+    y: courtyardBottom,
+    width: courtyardWidth,
+    height: courtyardHeight,
     fill: "#e2d9cf",
     stroke: "#c7bcae",
     strokeWidth: carWidth * 0.012,
@@ -385,18 +408,6 @@ export const APARTMENT_PARKING_WORLD = (() => {
     strokeWidth: carWidth * 0.02,
   });
 
-  // rear parking lot pad
-  objects.push({
-    type: "rect",
-    x: -totalWidth / 2,
-    y: lotBottom,
-    width: totalWidth,
-    height: lotHeight,
-    fill: "#e2d9cf",
-    stroke: "#c7bcae",
-    strokeWidth: carWidth * 0.012,
-  });
-
   // 2x2 dotted parking rectangles (10ft x 20ft) against courtyard wall
   for (let row = 0; row < 2; row += 1) {
     for (let col = 0; col < 2; col += 1) {
@@ -407,9 +418,9 @@ export const APARTMENT_PARKING_WORLD = (() => {
         width: spotWidth,
         height: spotHeight,
         fill: null,
-        stroke: "#c7bcae",
-        strokeWidth: carWidth * 0.014,
-        dash: [carWidth * 0.15, carWidth * 0.12],
+        stroke: "#9b8f82",
+        strokeWidth: carWidth * 0.02,
+        dash: [24, 16],
       });
     }
   }

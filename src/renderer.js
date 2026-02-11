@@ -86,7 +86,7 @@ export class PaperRenderer {
       closed: true,
       strokeColor: "#1c1b1a",
       strokeWidth: 0.04,
-      fillColor: "#c6c4c2",
+      fillColor: "#f8f6f2",
     });
 
     const outline = path.clone();
@@ -334,6 +334,9 @@ export class PaperRenderer {
           strokeColor: obj.stroke || null,
           strokeWidth: obj.strokeWidth || 0.02,
         });
+        if (obj.dash) {
+          path.dashArray = obj.dash;
+        }
         if (obj.rotation) {
           path.rotate(-obj.rotation);
         }
