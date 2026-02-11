@@ -33,6 +33,7 @@ export class PaperRenderer {
       scale = 60,
       camera = { x: 0, y: 0 },
       world = null,
+      collisionPoint = null,
     } = options;
 
     const carGroup = new this.paper.Group();
@@ -74,10 +75,36 @@ export class PaperRenderer {
       }
     }
 
+    if (collisionPoint) {
+      overlayGroup.addChild(this._drawCollisionMarker(collisionPoint));
+    }
+
     this.paper.view.zoom = scale;
     this.paper.view.center = new this.paper.Point(camera.x, -camera.y);
     this.paper.view.draw();
     this.paper.view.update();
+  }
+
+  _drawCollisionMarker(point) {
+    const circle = new this.paper.Path.Circle({
+      center: new this.paper.Point(point.x, -point.y),
+      radius: 18,
+      strokeColor: "#d12c2c",
+      strokeWidth: 6,
+      fillColor: null,
+    });
+    const group = new this.paper.Group([circle]);
+    if (point.amount) {
+      const label = new this.paper.PointText({
+        point: new this.paper.Point(point.x + 22, -point.y - 10),
+        content: `$${point.amount}`,
+        fillColor: "#d12c2c",
+        fontSize: 42,
+        fontWeight: "bold",
+      });
+      group.addChild(label);
+    }
+    return group;
   }
 
   _drawBody(state, model) {

@@ -263,6 +263,7 @@
           scale: camera.zoom,
           camera: { x: camera.x, y: camera.y },
           world: currentWorld,
+          collisionPoint: sim.lastCollision,
         });
         statusText.textContent = `x=${state.x.toFixed(2)}, y=${state.y.toFixed(2)}, heading=${(state.heading * 180 / Math.PI).toFixed(1)}°`;
       }
@@ -309,7 +310,7 @@
           if (driveState.throttle === 0) {
             return;
           }
-          sim.move(direction * stepPerFrame * Math.abs(driveState.throttle));
+          sim.moveWithCollision(direction * stepPerFrame * Math.abs(driveState.throttle), currentWorld);
           renderState(sim.state);
         }, frameMs);
       }

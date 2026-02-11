@@ -30,6 +30,8 @@ function addParkedCar(objects, { x, y, width, height, color = "#9aa3a9" }) {
     fill: color,
     stroke: "#4a4f55",
     strokeWidth: 0.03,
+    solid: true,
+    kind: "car",
   });
 }
 
@@ -78,6 +80,7 @@ export const PARKING_LOT_WORLD = (() => {
     fill: "#bfb3a5",
     stroke: "#a89988",
     strokeWidth: stroke,
+    solid: true,
   });
   objects.push({
     type: "rect",
@@ -88,6 +91,7 @@ export const PARKING_LOT_WORLD = (() => {
     fill: "#bfb3a5",
     stroke: "#a89988",
     strokeWidth: stroke,
+    solid: true,
   });
 
   // center driving lane line
@@ -201,6 +205,7 @@ export const TIGHT_PARKING_LOT_WORLD = (() => {
     fill: "#bfb3a5",
     stroke: "#a89988",
     strokeWidth: stroke,
+    solid: true,
   });
   objects.push({
     type: "rect",
@@ -211,6 +216,7 @@ export const TIGHT_PARKING_LOT_WORLD = (() => {
     fill: "#bfb3a5",
     stroke: "#a89988",
     strokeWidth: stroke,
+    solid: true,
   });
 
   objects.push({
@@ -338,6 +344,53 @@ export const APARTMENT_PARKING_WORLD = (() => {
     stroke: null,
   });
 
+  const wallThickness = 24;
+  // perimeter walls around gravel pad
+  objects.push({
+    type: "rect",
+    x: -totalWidth / 2 - wallThickness,
+    y: lotBottom - wallThickness,
+    width: totalWidth + wallThickness * 2,
+    height: wallThickness,
+    fill: "#8f857a",
+    stroke: "#6f6458",
+    strokeWidth: carWidth * 0.01,
+    solid: true,
+  });
+  objects.push({
+    type: "rect",
+    x: -totalWidth / 2 - wallThickness,
+    y: buildingTop,
+    width: totalWidth + wallThickness * 2,
+    height: wallThickness,
+    fill: "#8f857a",
+    stroke: "#6f6458",
+    strokeWidth: carWidth * 0.01,
+    solid: true,
+  });
+  objects.push({
+    type: "rect",
+    x: -totalWidth / 2 - wallThickness,
+    y: lotBottom - wallThickness,
+    width: wallThickness,
+    height: buildingTop - lotBottom + wallThickness * 2,
+    fill: "#8f857a",
+    stroke: "#6f6458",
+    strokeWidth: carWidth * 0.01,
+    solid: true,
+  });
+  objects.push({
+    type: "rect",
+    x: totalWidth / 2,
+    y: lotBottom - wallThickness,
+    width: wallThickness,
+    height: buildingTop - lotBottom + wallThickness * 2,
+    fill: "#8f857a",
+    stroke: "#6f6458",
+    strokeWidth: carWidth * 0.01,
+    solid: true,
+  });
+
   // road north of building
   objects.push({
     type: "rect",
@@ -360,6 +413,7 @@ export const APARTMENT_PARKING_WORLD = (() => {
     fill: "#ffffff",
     stroke: "#9a8b7c",
     strokeWidth: carWidth * 0.012,
+    solid: true,
   });
 
   // driveways left/right (north to south along building + courtyard)
@@ -394,6 +448,7 @@ export const APARTMENT_PARKING_WORLD = (() => {
     fill: "#e2d9cf",
     stroke: "#c7bcae",
     strokeWidth: carWidth * 0.012,
+    solid: true,
   });
   // courtyard fill (north clone)
   objects.push({
@@ -405,6 +460,7 @@ export const APARTMENT_PARKING_WORLD = (() => {
     fill: "#e2d9cf",
     stroke: "#c7bcae",
     strokeWidth: carWidth * 0.012,
+    solid: true,
   });
 
   // courtyard walls (lines)
